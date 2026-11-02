@@ -20,4 +20,5 @@ Right now, a satellite is crossing the UAE. It sees clouds over the Hajar, ships
 - **T+4 / T+6:** design targets vs ~T+48 optical — **not** measured wall-clock.  
 - **Damage:** **3,000+** real Overture critical places triaged against the mask.
 
-**Demo:** http://127.0.0.1:3848/orbit · Full notes: [README.md](README.md)
+**Live:** https://qwen-supernova-2.onrender.com/orbit  
+**Local:** http://127.0.0.1:3848/orbit · Full notes: [README.md](README.md)
