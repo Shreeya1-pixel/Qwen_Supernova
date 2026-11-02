@@ -2,15 +2,11 @@
 
 **Supernova × SpacePoint · Theme 04 — First Responders from Orbit**
 
-> Map floods within **hours**, not days · Assess damage to roads & buildings · Learn from the **April 2024 UAE floods**  
-> **EO stack:** Sentinel-1 radar · Sentinel-2 · Copernicus DEM · **NASA GIBS** (live) · **Overture Maps** triage
+NABD maps April 2024 UAE floods from orbit in hours: Sentinel-1 flood mask, NASA GIBS context, and Overture triage of roads and critical places.  
+Live stack is Sentinel-1 / Sentinel-2 / Copernicus DEM (STAC) + NASA GIBS + Overture — FastAPI + Next.js on one Render image.  
+Honest limits: unvalidated offline S1 mask; **T+4 / T+6** are design targets only.
 
-| | |
-|---|---|
-| **Live demo** | **[https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com)** → open **[/orbit](https://qwen-supernova-2.onrender.com/orbit)** |
-| **Repo** | [Shreeya1-pixel/Qwen_Supernova](https://github.com/Shreeya1-pixel/Qwen_Supernova) |
-| **Pitch notes** | [HACKATHON.md](HACKATHON.md) |
-
+**Live demo:** [https://qwen-supernova-2.onrender.com/orbit](https://qwen-supernova-2.onrender.com/orbit)  
 <sub>Free-tier Render may cold-start ~30–60s. If Overview looks empty on first hit, wait and refresh — `/api/health` and `/orbit` are the judge path.</sub>
 
 <p align="center"><img src="docs/img/overview.jpg" width="720" alt="NABD operations overview"></p>
@@ -90,8 +86,6 @@ FastAPI (nabd)
 |:---:|:---:|
 | <img src="docs/img/nasa-false721.jpg" width="360" alt="MODIS false colour"> | <img src="docs/img/readme/proto-orbit-live.jpg" width="360" alt="Orbit response with NASA GIBS wall"> |
 | False-colour GIBS (live WMS) | `/orbit` — NASA wall + KPIs (Engines online) |
-
-<p align="center"><img src="docs/img/readme/proto-orbit-live.jpg" width="720" alt="Orbit response — NASA GIBS wall live on Render"></p>
 
 Also: live STAC scenes → `GET /api/orbit/scenes`. Mask provenance → scene IDs in GeoJSON properties + `pytest` (`test_flood_mask_comes_from_stored_scene_ids`).
 
