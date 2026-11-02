@@ -2,18 +2,23 @@
 
 **Supernova × SpacePoint · Theme 04 — First Responders from Orbit**
 
-NABD is the **satellite → multilingual → offline** responder stack: live **NASA GIBS** + Sentinel-1/2 + Copernicus DEM, **8-language** codeswitch intake, and **21-byte** signed alerts that hop phone-to-phone with no internet.  
-April 2024 UAE / Hatta floods are the worked example (S1 flood mask + Overture triage) — not the whole product.  
+NABD is the **satellite → multilingual → offline** responder stack — not a flood-map-only demo.  
+April 2024 UAE / Hatta is the **worked example**; the product differentiators are EO + last-mile language + mesh alerts.  
 Honest limits: flood mask is offline-precomputed and **unvalidated**; **T+4 / T+6** are design targets only.
 
-**Live demo:** [https://qwen-supernova-2.onrender.com/orbit](https://qwen-supernova-2.onrender.com/orbit)  
-<sub>Free-tier Render may cold-start ~30–60s. If Overview looks empty on first hit, wait and refresh — `/api/health` and `/orbit` are the judge path.</sub>
+| Differentiator | What judges can open |
+|---|---|
+| **① Satellite** | Live **NASA GIBS** wall · Sentinel-1/2 · Copernicus DEM (STAC) · S1 flood mask · Overture triage → [/orbit](https://qwen-supernova-2.onrender.com/orbit) |
+| **② Multilingual** | **8 languages** · on-device **codeswitch** intake (no LLM) · EN/AR UI + RTL → [/messages](https://qwen-supernova-2.onrender.com/messages) |
+| **③ Offline** | **21-byte** signed BLE-sized frames · phone-to-phone hop · no internet → [/alerts](https://qwen-supernova-2.onrender.com/alerts) |
+
+**Live demo:** [https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com) · cold-start ~30–60s on free Render.
 
 <p align="center"><img src="docs/img/overview.jpg" width="720" alt="NABD operations overview"></p>
 
 ---
 
-## Why this is Theme 04 (technically)
+## Theme 04 payload (April 2024 worked example)
 
 | Theme ask | What NABD ships |
 |---|---|
@@ -28,13 +33,12 @@ Honest limits: flood mask is offline-precomputed and **unvalidated**; **T+4 / T+
 
 ---
 
-## Judge path (2 minutes on the live site)
+## Judge path (2 minutes — hit all three pillars)
 
-1. **[https://qwen-supernova-2.onrender.com/orbit](https://qwen-supernova-2.onrender.com/orbit)** — NASA wall · S1 flood timeline · Overture triage  
-2. Click phases **T+0 → T+6 → T+12** — mask + KPIs expand  
-3. **[/alerts](https://qwen-supernova-2.onrender.com/alerts)** — 21-byte off-grid frame  
-4. **[/messages](https://qwen-supernova-2.onrender.com/messages)** — multilingual / codeswitch intake  
-5. Smoke APIs:
+1. **Satellite →** [/orbit](https://qwen-supernova-2.onrender.com/orbit) — NASA wall · S1 phases **T+0 → T+6 → T+12** · Overture triage  
+2. **Multilingual →** [/messages](https://qwen-supernova-2.onrender.com/messages) — type mixed-language symptoms · council reacts  
+3. **Offline →** [/alerts](https://qwen-supernova-2.onrender.com/alerts) — fire a 21-byte frame · phones update without internet  
+4. Smoke APIs:
 
 ```bash
 curl -s https://qwen-supernova-2.onrender.com/api/health
@@ -91,19 +95,16 @@ Also: live STAC scenes → `GET /api/orbit/scenes`. Mask provenance → scene ID
 
 ---
 
-## Beyond Theme 04 (same product, sidebar)
+## ② Multilingual + ③ Offline (evidence)
 
-| Messages · codeswitch | Alerts · off-grid |
+Peers can also replay Hatta 2024. NABD still ships the **last mile**: workers speak many languages, and sites lose connectivity.
+
+| ② Multilingual | ③ Offline last mile |
 |:---:|:---:|
 | <img src="docs/img/messages.jpg" width="420" alt="Messages — multilingual intake + council"> | <img src="docs/img/alerts.jpg" width="420" alt="Alerts — 21-byte frames + phone mesh"> |
-| [Open /messages](https://qwen-supernova-2.onrender.com/messages) · 8 languages · on-device lexicon | [Open /alerts](https://qwen-supernova-2.onrender.com/alerts) · 21-byte BLE-sized signed frames |
+| [/messages](https://qwen-supernova-2.onrender.com/messages) · 8 languages · codeswitch · no LLM | [/alerts](https://qwen-supernova-2.onrender.com/alerts) · 21-byte signed · BLE hop · per-phone language |
 
-| Pillar | What’s real |
-|---|---|
-| **Multilingual** | EN/AR UI + RTL · on-device codeswitch (no LLM required to parse) |
-| **Offline last mile** | Signed alert frame · verify · dedupe · per-phone language |
-| **Safety engines** | Council (land × body × integrity) · exposure graph · strain · audit hash chain |
-| **Resilience** | Weather cache + synthetic fallback so free-tier 429s don’t blank Overview |
+Also under the hood: deterministic council (land × body × integrity) · exposure graph · audit hash chain · weather cache so free-tier 429s don’t blank Overview.
 
 ---
 
