@@ -2,18 +2,14 @@
 
 **Supernova × SpacePoint · Theme 04 — First Responders from Orbit**
 
-NABD is the **satellite → multilingual → offline** responder stack — not a flood-map-only demo.  
-April 2024 UAE / Hatta is the **worked example**; the product differentiators are EO + last-mile language + mesh alerts.  
-Honest limits: flood mask is offline-precomputed, **unvalidated**, and km² includes smoothing; **T+4 / T+6** are design targets only; offline relay in the browser is **BroadcastChannel** (stand-in for BLE).
+**Live demo:** [https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com) · cold-start ~30–60s on free Render.  
+**Demo video:** [Google Drive](https://drive.google.com/drive/folders/10RjlP-vZgU97e-VpDHzhiybuU0HiYyhU?usp=sharing)
 
 | Differentiator | What judges can open |
 |---|---|
 | **① Satellite** | Live **NASA GIBS** wall · Sentinel-1/2 · Copernicus DEM (STAC) · S1 flood mask · Overture triage → [/orbit](https://qwen-supernova-2.onrender.com/orbit) |
 | **② Multilingual** | **8 languages** · on-device **codeswitch** intake (no LLM) · EN/AR UI + RTL → [/messages](https://qwen-supernova-2.onrender.com/messages) |
 | **③ Offline** | **21-byte** signed BLE-sized frame (what handsets would carry) · demo radio = **BroadcastChannel** → [/alerts](https://qwen-supernova-2.onrender.com/alerts) |
-
-**Live demo:** [https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com) · cold-start ~30–60s on free Render.  
-**Demo video:** [Google Drive](https://drive.google.com/drive/folders/10RjlP-vZgU97e-VpDHzhiybuU0HiYyhU?usp=sharing)
 
 <p align="center"><img src="docs/img/overview.jpg" width="720" alt="NABD operations overview"></p>
 
