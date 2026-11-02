@@ -10,6 +10,7 @@ import os
 import time
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
@@ -29,11 +30,16 @@ from .sites import SCENARIOS, SITES, get_site
 
 app = FastAPI(title="NABD API", version="0.1.0",
               description="Early warning that links environmental stress to human health in extreme environments.")
+
+_cors_env = os.environ.get("NABD_CORS", "*")
+_cors_origins = [o.strip() for o in _cors_env.split(",") if o.strip()] or ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.environ.get("NABD_CORS", "http://localhost:3000,http://127.0.0.1:3000,"
-                                 "http://localhost:3848,http://127.0.0.1:3848").split(","),
-    allow_methods=["*"], allow_headers=["*"],
+    allow_origins=_cors_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -426,3 +432,19 @@ async def audit(limit: int = 20):
         return {"records": []}
     lines = AUDIT_LOG.read_text().strip().splitlines()[-limit:]
     return {"records": [json.loads(line) for line in reversed(lines)]}
+
+
+# Mount frontend static export if present (enables single-service / Docker deploy)
+_dist_candidate = os.environ.get("FRONTEND_DIST")
+_dist_path = Path(_dist_candidate) if _dist_candidate else Path(__file__).resolve().parents[2] / "frontend" / "out"
+
+if _dist_path.is_dir():
+    from starlette.staticfiles import StaticFiles
+    app.mount("/", StaticFiles(directory=str(_dist_path), html=True), name="frontend")
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8040))
+    uvicorn.run("nabd.main:app", host="0.0.0.0", port=port, reload=False)
+

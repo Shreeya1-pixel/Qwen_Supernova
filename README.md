@@ -16,6 +16,18 @@ Right now, a satellite is crossing the UAE. It sees clouds over the Hajar, ships
 
 ---
 
+## Deploy on Render
+
+This repository is pre-configured for one-click deployment on **[Render](https://render.com)**:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+- **One-Click Blueprint (`render.yaml`)**: Deploys both FastAPI backend and Next.js frontend services automatically.
+- **Single-Container Free Tier (`Dockerfile`)**: Deploys both frontend and backend in 1 free-tier Web Service (100% within the 750 free monthly hours).
+- See **[DEPLOY_RENDER.md](DEPLOY_RENDER.md)** for complete deployment options, environment variables, and verification steps.
+
+---
+
 ## For judges — run in ~5 minutes
 
 **Needs:** Python 3.11+, Node 20+, two terminals.

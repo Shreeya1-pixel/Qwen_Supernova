@@ -2,10 +2,14 @@
   "name": "nabd-frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1 --port 3848",
-    "build": "next build",
-    "start": "next start --hostname 127.0.0.1 --port 3848",
+    "build": "next build --webpack",
+    "build:export": "NEXT_OUTPUT_EXPORT=true next build --webpack",
+    "start": "next start -H 0.0.0.0 -p ${PORT:-3848}",
     "lint": "eslint"
   },
   "dependencies": {

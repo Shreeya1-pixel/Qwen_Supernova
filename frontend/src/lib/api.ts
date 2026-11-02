@@ -1,4 +1,17 @@
-export const API = process.env.NEXT_PUBLIC_NABD_API ?? "http://127.0.0.1:8040/api";
+function getApiBase(): string {
+  if (process.env.NEXT_PUBLIC_NABD_API) {
+    return process.env.NEXT_PUBLIC_NABD_API.replace(/\/+$/, "");
+  }
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host !== "localhost" && host !== "127.0.0.1") {
+      return "/api";
+    }
+  }
+  return "http://127.0.0.1:8040/api";
+}
+
+export const API = getApiBase();
 
 export type Level = "SAFE" | "WATCH" | "CAUTION" | "RESTRICT" | "STOP_WORK";
 

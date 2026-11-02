@@ -1,0 +1,57 @@
+services:
+  # ----------------------------------------------------------------------------
+  # Backend API Web Service (FastAPI)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: qwen-supernova-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    region: oregon # or frankfurt, ohio, singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn nabd.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.10
+      - key: NABD_CORS
+        value: "*"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_TEST_TO
+        sync: false
+      - key: JIRA_BASE_URL
+        sync: false
+      - key: JIRA_USER_EMAIL
+        sync: false
+      - key: JIRA_API_TOKEN
+        sync: false
+      - key: JIRA_PROJECT_KEY
+        sync: false
+
+  # ----------------------------------------------------------------------------
+  # Frontend UI Web Service (Next.js)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: qwen-supernova-frontend
+    runtime: node
+    rootDir: frontend
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /orbit
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: NABD_BACKEND_URL
+        fromService:
+          type: web
+          name: qwen-supernova-api
+          property: host
+      - key: NEXT_PUBLIC_NABD_API
+        sync: false

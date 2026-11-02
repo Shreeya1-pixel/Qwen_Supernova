@@ -1,0 +1,30 @@
+services:
+  # ----------------------------------------------------------------------------
+  # Single Unified Service (FastAPI + Next.js static build in 1 container)
+  # Free-tier friendly: 1 service, 0 CORS issues, runs 24/7 within 750 free hrs
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: qwen-supernova
+    env: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: NABD_CORS
+        value: "*"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_TEST_TO
+        sync: false
+      - key: JIRA_BASE_URL
+        sync: false
+      - key: JIRA_USER_EMAIL
+        sync: false
+      - key: JIRA_API_TOKEN
+        sync: false
+      - key: JIRA_PROJECT_KEY
+        sync: false
