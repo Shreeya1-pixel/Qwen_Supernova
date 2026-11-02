@@ -91,18 +91,19 @@ Also: live STAC scenes → `GET /api/orbit/scenes`. Mask provenance → scene ID
 
 ---
 
-## Technical strengths beyond Theme 04
+## Beyond Theme 04 (same product, sidebar)
 
-These are the same product judges can open from the sidebar — not slideware.
+| Messages · codeswitch | Alerts · off-grid |
+|:---:|:---:|
+| <img src="docs/img/messages.jpg" width="420" alt="Messages — multilingual intake + council"> | <img src="docs/img/alerts.jpg" width="420" alt="Alerts — 21-byte frames + phone mesh"> |
+| [Open /messages](https://qwen-supernova-2.onrender.com/messages) · 8 languages · on-device lexicon | [Open /alerts](https://qwen-supernova-2.onrender.com/alerts) · 21-byte BLE-sized signed frames |
 
 | Pillar | What’s real |
 |---|---|
-| **Multilingual** | 8 languages for alerts · EN/AR UI + RTL · on-device codeswitch intake (no LLM required to parse) |
-| **Offline last mile** | 21-byte signed alert frame (BLE-advert sized) · verify · dedupe · per-phone language |
-| **Safety engines** | Deterministic council (land × body × integrity) · exposure graph · personal strain · audit hash chain |
-| **Resilience** | Weather cache + synthetic fallback so Render free-tier 429s don’t blank Overview |
-
-<p align="center"><img src="docs/img/messages.jpg" width="420" alt="Messages"> <img src="docs/img/alerts.jpg" width="420" alt="Alerts"></p>
+| **Multilingual** | EN/AR UI + RTL · on-device codeswitch (no LLM required to parse) |
+| **Offline last mile** | Signed alert frame · verify · dedupe · per-phone language |
+| **Safety engines** | Council (land × body × integrity) · exposure graph · strain · audit hash chain |
+| **Resilience** | Weather cache + synthetic fallback so free-tier 429s don’t blank Overview |
 
 ---
 
