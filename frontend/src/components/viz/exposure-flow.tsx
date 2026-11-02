@@ -15,7 +15,8 @@ export function ExposureFlow({ graph, heads = HEADS }: { graph: Graph; heads?: R
   const [hover, setHover] = useState<string | null>(null);
 
   const layout = useMemo(() => {
-    const cols = LAYERS.map((layer) => graph.nodes.filter((n) => n.layer === layer).sort((a, b) => b.risk - a.risk));
+    const nodes = graph?.nodes ?? [];
+    const cols = LAYERS.map((layer) => nodes.filter((n) => n.layer === layer).sort((a, b) => b.risk - a.risk));
     const rows = Math.max(...cols.map((c) => c.length), 1);
     const rowH = 54;
     const H = rows * rowH + 40;
@@ -24,12 +25,15 @@ export function ExposureFlow({ graph, heads = HEADS }: { graph: Graph; heads?: R
     cols.forEach((col, i) => {
       const offset = ((rows - col.length) * rowH) / 2;
       col.forEach((n, j) => {
-        const h = 8 + n.risk * 30;
+        // Min bar height so calm-day watch nodes stay visible (not paper-on-paper).
+        const h = 14 + Math.max(n.risk, 0.08) * 28;
         pos[n.id] = { x: colX(i), y: 40 + offset + j * rowH + rowH / 2, h, layer: n.layer, label: n.label, risk: n.risk };
       });
     });
-    return { pos, H, colX };
+    return { pos, H, colX, empty: nodes.length === 0 };
   }, [graph]);
+
+  const links = graph?.links ?? [];
 
   const lit = useMemo(() => {
     if (!hover) return null;
@@ -38,7 +42,7 @@ export function ExposureFlow({ graph, heads = HEADS }: { graph: Graph; heads?: R
       let grew = true;
       while (grew) {
         grew = false;
-        for (const l of graph.links) {
+        for (const l of links) {
           const [from, to] = dir === "down" ? [l.source, l.target] : [l.target, l.source];
           if (set.has(from) && !set.has(to) && l.flow > 0.01) {
             set.add(to);
@@ -53,9 +57,17 @@ export function ExposureFlow({ graph, heads = HEADS }: { graph: Graph; heads?: R
     set.add(hover);
     walk("up");
     return new Set([...down, ...set]);
-  }, [hover, graph.links]);
+  }, [hover, links]);
 
-  const { pos, H, colX } = layout;
+  const { pos, H, colX, empty } = layout;
+
+  if (empty) {
+    return (
+      <p className="rounded-md border border-dashed border-[var(--line)] px-3 py-6 text-center text-[0.85rem] text-muted">
+        No elevated exposure pathways right now — watching site cohorts.
+      </p>
+    );
+  }
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Exposure pathways from hazards to health outcomes">
@@ -65,7 +77,7 @@ export function ExposureFlow({ graph, heads = HEADS }: { graph: Graph; heads?: R
         </text>
       ))}
 
-      {graph.links.map((l, k) => {
+      {links.map((l, k) => {
         const a = pos[l.source];
         const b = pos[l.target];
         if (!a || !b) return null;
@@ -102,12 +114,19 @@ export function ExposureFlow({ graph, heads = HEADS }: { graph: Graph; heads?: R
             opacity={on ? 1 : 0.25}
             className="cursor-default transition-opacity duration-300"
           >
-            <rect x={n.x} y={n.y - n.h / 2} width={COL_W} height={n.h} fill={hot ? "var(--oxide)" : n.risk > 0.15 ? "var(--ink)" : "var(--paper)"} stroke="var(--ink)" />
+            <rect
+              x={n.x}
+              y={n.y - n.h / 2}
+              width={COL_W}
+              height={n.h}
+              fill={hot ? "var(--oxide)" : n.risk > 0.15 ? "var(--ink)" : "color-mix(in srgb, var(--ink) 35%, var(--paper))"}
+              stroke="var(--ink)"
+            />
             <text x={n.x + COL_W + 8} y={n.y - 2} fontSize="14" fill="var(--ink)" fontWeight={hot ? 600 : 400}>
               {n.label}
             </text>
             <text x={n.x + COL_W + 8} y={n.y + 13} className="mono" fontSize="10.5" fill="var(--muted)">
-              {Math.round(n.risk * 100)}%
+              {n.risk < 0.01 ? "clear" : `${Math.round(n.risk * 100)}%`}
             </text>
           </g>
         );

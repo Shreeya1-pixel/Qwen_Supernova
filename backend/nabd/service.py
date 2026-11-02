@@ -99,6 +99,23 @@ def crew_states(frame: SiteFrame, site: Site, now: datetime, ramadan_demo: bool)
     return rows
 
 
+def _exposure_block(prop, site) -> dict:
+    cohorts = exposure_graph.explain(prop, "cohort")
+    outcomes = exposure_graph.explain(prop, "outcome")
+    ensure = set(site.cohorts) | {"heat", "dust", "air", "uv"}
+    if site.coastal:
+        ensure.add("sea_warming")
+    if site.id == "hatta":
+        ensure.add("flood")
+    graph = exposure_graph.graph_payload(prop, ensure=ensure)
+    return {
+        "cohorts": cohorts or exposure_graph.watch_cohorts(site.cohorts),
+        "outcomes": outcomes,
+        "graph": graph,
+        "calm": not cohorts,
+    }
+
+
 async def snapshot(site_id: str, ramadan_demo: bool = False, force: bool = False,
                    replay: str | None = None) -> dict:
     site = get_site(site_id)
@@ -155,11 +172,7 @@ async def snapshot(site_id: str, ramadan_demo: bool = False, force: bool = False
         "index": asdict(index),
         "early_warning": warnings,
         "body_warning": body_warnings,
-        "exposure": {
-            "cohorts": exposure_graph.explain(prop, "cohort"),
-            "outcomes": exposure_graph.explain(prop, "outcome"),
-            "graph": exposure_graph.graph_payload(prop),
-        },
+        "exposure": _exposure_block(prop, site),
         "crew": workers,
         "trust": trust,
         "council": decision,

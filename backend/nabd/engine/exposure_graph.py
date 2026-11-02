@@ -148,11 +148,43 @@ def explain(prop: Propagation, layer: str, top: int = 5) -> list[dict]:
     } for n, v in rows[:top]]
 
 
-def graph_payload(prop: Propagation) -> dict:
-    """Nodes + weighted links for the frontend flow diagram."""
-    nodes = [{"id": n, "layer": layer, "label": label, "risk": prop.risk.get(n, 0.0)}
-             for n, (layer, label) in NODES.items() if prop.risk.get(n, 0.0) > 0.005]
+def watch_cohorts(cohort_ids: tuple[str, ...] | list[str]) -> list[dict]:
+    """Calm-day fallback: site cohorts at risk 0 so the panel is never an empty box."""
+    out = []
+    for c in cohort_ids:
+        if c not in NODES or NODES[c][0] != "cohort":
+            continue
+        out.append({
+            "id": c,
+            "label": NODES[c][1],
+            "risk": 0.0,
+            "clear": True,
+            "path": [],
+        })
+    return out
+
+
+def graph_payload(prop: Propagation, ensure: set[str] | None = None) -> dict:
+    """Nodes + weighted links for the frontend flow diagram.
+
+    ``ensure`` keeps named nodes visible even at risk 0 (calm days), so
+    overview / signals never render a blank 'Who is exposed' card.
+    """
+    ensure = ensure or set()
+    nodes = [
+        {"id": n, "layer": layer, "label": label, "risk": prop.risk.get(n, 0.0)}
+        for n, (layer, label) in NODES.items()
+        if prop.risk.get(n, 0.0) > 0.005 or n in ensure
+    ]
     present = {n["id"] for n in nodes}
-    links = [{"source": s, "target": d, "flow": round(prop.risk[s] * w * DAMPING, 4)}
-             for s, d, w in EDGES if s in present and d in present]
-    return {"nodes": nodes, "links": [l for l in links if l["flow"] > 0.005], "layers": _LAYER_ORDER}
+    links = [
+        {"source": s, "target": d, "flow": round(prop.risk.get(s, 0.0) * w * DAMPING, 4)}
+        for s, d, w in EDGES
+        if s in present and d in present
+    ]
+    return {
+        "nodes": nodes,
+        "links": [l for l in links if l["flow"] > 0.005],
+        "layers": _LAYER_ORDER,
+        "calm": not any(n["risk"] > 0.01 for n in nodes),
+    }

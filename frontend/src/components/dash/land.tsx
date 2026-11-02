@@ -266,23 +266,27 @@ export function SignalsPanel({ className, detailed = false }: { className?: stri
 
 export function ExposedPanel({ className, graph = false }: { className?: string; graph?: boolean }) {
   const { snapshot: s, t } = useNabd();
+  const cohorts = s?.exposure?.cohorts ?? [];
+  const calm = Boolean(s?.exposure?.calm) || (cohorts.length > 0 && cohorts.every((c) => c.risk < 0.01));
   return (
-    <Panel title={t("dash.exposed")} className={className}>
+    <Panel title={t("dash.exposed")} className={className} action={calm && s ? <span className="label">clear</span> : undefined}>
       {!s ? (
         <Loading />
       ) : graph ? (
         <ExposureFlow graph={s.exposure.graph} heads={{ hazard: t("reach.hazard"), pathway: t("reach.pathway"), cohort: t("reach.cohort"), outcome: t("reach.outcome") }} />
+      ) : cohorts.length === 0 ? (
+        <p className="text-[0.85rem] text-muted">{t("dash.exposedEmpty")}</p>
       ) : (
         <ul className="space-y-2.5">
-          {s.exposure.cohorts.slice(0, 5).map((c) => (
+          {cohorts.slice(0, 5).map((c) => (
             <li key={c.id}>
               <div className="mb-1 flex items-baseline justify-between gap-2 text-[0.82rem]">
                 <span className="truncate font-bold">{c.label}</span>
-                <span className="num text-base">{Math.round(c.risk * 100)}</span>
+                <span className="num text-base">{c.risk < 0.01 ? "—" : Math.round(c.risk * 100)}</span>
               </div>
-              <Bar value={c.risk} tone={riskTone(c.risk)} />
+              <Bar value={Math.max(c.risk, c.risk < 0.01 ? 0.04 : c.risk)} tone={c.risk < 0.01 ? "var(--muted)" : riskTone(c.risk)} />
               <span className="label mt-0.5 block truncate normal-case" dir="ltr">
-                {c.path.map((p) => p.label).join(" → ")}
+                {c.path?.length ? c.path.map((p) => p.label).join(" → ") : t("dash.exposedWatch")}
               </span>
             </li>
           ))}

@@ -52,11 +52,7 @@ export function NasaWall({ nasa }: { nasa: OrbitNasa | null }) {
             <img
               src={tile.url}
               alt={tile.title}
-              className={cn(
-                "h-24 w-full object-cover",
-                // Sparse PNG products are mostly transparent — dark plate so they don't read as “blank”.
-                tile.sparse || tile.format === "image/png" ? "bg-ink" : "bg-[var(--line)]",
-              )}
+              className="h-24 w-full bg-[var(--line)] object-cover"
               loading="lazy"
             />
             <div className="px-2 py-1.5">

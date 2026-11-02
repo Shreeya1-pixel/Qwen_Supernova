@@ -123,7 +123,8 @@ export interface Snapshot {
   exposure: {
     cohorts: Exposed[];
     outcomes: Exposed[];
-    graph: { nodes: GraphNode[]; links: { source: string; target: string; flow: number }[]; layers: string[] };
+    graph: { nodes: GraphNode[]; links: { source: string; target: string; flow: number }[]; layers: string[]; calm?: boolean };
+    calm?: boolean;
   };
   crew: Worker[];
   trust: { trusted: boolean; score: number; reasons: string[] };

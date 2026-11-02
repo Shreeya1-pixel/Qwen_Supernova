@@ -1,9 +1,9 @@
 """NASA GIBS — live WMS satellite imagery over the UAE (keyless).
 
-Gallery is curated for layers that actually return pixels over the UAE for
-14–17 Apr 2024. Sparse thematic products (flood flags, vapour, SST) use a
-wider Gulf bbox; empty aerosol/night products are omitted so the wall does
-not show blank tiles in the pitch demo.
+Gallery is reflectance-only for 14–17 Apr 2024: full-frame JPEG tiles that
+actually render over the Dubai–Hatta corridor. Sparse / empty products
+(aerosol, night lights, vapour, SST, flood flags) are omitted so the wall
+never shows black blanks.
 """
 from __future__ import annotations
 
@@ -12,23 +12,19 @@ from urllib.parse import urlencode
 
 # UAE bbox — WMS 1.3.0 EPSG:4326 order (lat_min, lon_min, lat_max, lon_max)
 BBOX = (22.45, 51.4, 26.35, 57.0)
-# Tighter zoom on Dubai–Hatta flood corridor for reflectance “wow” tiles
+# Tighter zoom on Dubai–Hatta flood corridor
 FLOOD_BBOX = (24.55, 54.85, 25.55, 56.45)
-# Wider Gulf frame for sparse thematic overlays (flood / vapour / SST)
-GULF_BBOX = (22.0, 50.5, 27.5, 57.5)
 GIBS = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi"
 EVENT_DAY = date(2024, 4, 16)
 
-# kind → (layer_id, mime, day_offset, title, vibe, bbox_mode)
-# bbox_mode: "flood" | "uae" | "gulf"
-LAYERS: dict[str, tuple[str, str, int, str, str, str]] = {
+# kind → (layer_id, mime, day_offset, title, vibe)
+LAYERS: dict[str, tuple[str, str, int, str, str]] = {
     "false_721": (
         "MODIS_Aqua_CorrectedReflectance_Bands721",
         "image/jpeg",
         1,
         "MODIS Aqua · bands 7-2-1",
         "False colour: sediment & wet ground light up after rain",
-        "flood",
     ),
     "aqua_true": (
         "MODIS_Aqua_CorrectedReflectance_TrueColor",
@@ -36,7 +32,6 @@ LAYERS: dict[str, tuple[str, str, int, str, str, str]] = {
         1,
         "MODIS Aqua · true colour",
         "Natural-colour pass the day after peak rain",
-        "flood",
     ),
     "false_367": (
         "MODIS_Terra_CorrectedReflectance_Bands367",
@@ -44,23 +39,6 @@ LAYERS: dict[str, tuple[str, str, int, str, str, str]] = {
         0,
         "MODIS Terra · bands 3-6-7",
         "Shortwave false colour — land / water contrast",
-        "flood",
-    ),
-    "viirs_swir": (
-        "VIIRS_NOAA20_CorrectedReflectance_BandsM11-I2-I1",
-        "image/jpeg",
-        0,
-        "VIIRS NOAA-20 · SWIR false colour",
-        "Crisp day pass over the Gulf & Hajar",
-        "flood",
-    ),
-    "truecolor": (
-        "VIIRS_NOAA20_CorrectedReflectance_TrueColor",
-        "image/jpeg",
-        1,
-        "VIIRS NOAA-20 · true colour",
-        "What the satellite saw in natural colour",
-        "flood",
     ),
     "terra_721": (
         "MODIS_Terra_CorrectedReflectance_Bands721",
@@ -68,49 +46,31 @@ LAYERS: dict[str, tuple[str, str, int, str, str, str]] = {
         1,
         "MODIS Terra · bands 7-2-1",
         "Second false-colour look — Terra pass after the storm",
-        "flood",
     ),
-    "night_lights": (
-        "VIIRS_SNPP_DayNightBand_At_Sensor_Radiance",
-        "image/png",
-        -2,
-        "VIIRS · night lights",
-        "Cities glowing through the storm week (Day/Night Band)",
-        "uae",
-    ),
-    "flood_2day": (
-        "MODIS_Combined_Flood_2-Day",
-        "image/png",
+    "viirs_swir": (
+        "VIIRS_SNPP_CorrectedReflectance_BandsM11-I2-I1",
+        "image/jpeg",
         1,
-        "MODIS flood water · 2-day",
-        "NASA flood flags (sparse over desert — shown on Gulf frame)",
-        "gulf",
+        "VIIRS SNPP · SWIR false colour",
+        "Crisp day pass over the Gulf & Hajar",
     ),
-    "vapor": (
-        "MODIS_Terra_Water_Vapor_5km_Night",
-        "image/png",
-        0,
-        "MODIS · water vapour (night)",
-        "Moisture field the night of the rains",
-        "gulf",
-    ),
-    "sst": (
-        "GHRSST_L4_MUR_Sea_Surface_Temperature",
-        "image/png",
-        0,
-        "MUR sea-surface temperature",
-        "Gulf SST — thermal context for the event",
-        "gulf",
+    "viirs_true": (
+        "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+        "image/jpeg",
+        1,
+        "VIIRS SNPP · true colour",
+        "Natural colour the day after the rains",
     ),
 }
 
-
-def _bbox_for(mode: str) -> tuple[float, float, float, float]:
-    if mode == "gulf":
-        return GULF_BBOX
-    if mode == "uae":
-        return BBOX
-    return FLOOD_BBOX
+GALLERY_ORDER = [
+    "false_721",
+    "aqua_true",
+    "false_367",
+    "terra_721",
+    "viirs_swir",
+    "viirs_true",
+]
 
 
 def _url(layer: str, fmt: str, day: date, width: int, bbox: tuple[float, float, float, float]) -> str:
@@ -125,15 +85,15 @@ def _url(layer: str, fmt: str, day: date, width: int, bbox: tuple[float, float, 
         "WIDTH": width,
         "HEIGHT": height,
         "FORMAT": fmt,
-        "TRANSPARENT": "true",
+        "TRANSPARENT": "false",
         "TIME": day.isoformat(),
     })
 
 
-def _tile(kind: str, day: date | None = None, *, width: int = 1280) -> dict:
-    layer, fmt, offset, title, vibe, mode = LAYERS[kind]
+def _tile(kind: str, day: date | None = None, *, width: int = 1280, tight: bool = True) -> dict:
+    layer, fmt, offset, title, vibe = LAYERS[kind]
     when = day or (EVENT_DAY + timedelta(days=offset))
-    bbox = _bbox_for(mode)
+    bbox = FLOOD_BBOX if tight else BBOX
     return {
         "id": kind,
         "title": title,
@@ -141,7 +101,7 @@ def _tile(kind: str, day: date | None = None, *, width: int = 1280) -> dict:
         "layer": layer,
         "date": when.isoformat(),
         "format": fmt,
-        "sparse": mode == "gulf",
+        "sparse": False,
         "url": _url(layer, fmt, when, width, bbox),
         "url_uae": _url(layer, fmt, when, width, BBOX),
         "source": "NASA GIBS WMS",
@@ -150,27 +110,14 @@ def _tile(kind: str, day: date | None = None, *, width: int = 1280) -> dict:
 
 
 def april_2024_context() -> dict:
-    """Full NASA satellite wall for the April 2024 UAE floods."""
-    # Lead with full-frame reflectance so the hero is never a blank PNG.
-    order = [
-        "false_721",
-        "aqua_true",
-        "false_367",
-        "viirs_swir",
-        "truecolor",
-        "terra_721",
-        "night_lights",
-        "flood_2day",
-        "vapor",
-        "sst",
-    ]
-    gallery = [_tile(k, width=1400) for k in order]
+    """NASA satellite wall — only tiles that fill the frame for Apr 2024 UAE."""
+    gallery = [_tile(k, width=1400) for k in GALLERY_ORDER]
     sequence = [
-        _tile("truecolor", EVENT_DAY - timedelta(days=2), width=1100),
-        _tile("false_721", EVENT_DAY, width=1100),
-        _tile("flood_2day", EVENT_DAY + timedelta(days=1), width=1100),
-        _tile("vapor", EVENT_DAY, width=1100),
+        _tile("viirs_true", EVENT_DAY - timedelta(days=2), width=1100),
+        _tile("false_367", EVENT_DAY, width=1100),
+        _tile("false_721", EVENT_DAY + timedelta(days=1), width=1100),
         _tile("aqua_true", EVENT_DAY + timedelta(days=1), width=1100),
+        _tile("terra_721", EVENT_DAY + timedelta(days=1), width=1100),
     ]
     return {
         "ok": True,
@@ -184,15 +131,15 @@ def april_2024_context() -> dict:
         "gallery": gallery,
         "sequence": sequence,
         "hero": _tile("false_721", EVENT_DAY + timedelta(days=1), width=1600),
-        "layers": {k: _tile(k) for k in order},
+        "layers": {k: _tile(k) for k in GALLERY_ORDER},
         "note": (
             "Connected to NASA GIBS — live GetMap WMS, no API key. "
-            "Reflectance tiles fill the frame; flood / vapour / SST are sparse "
-            "flag products (transparent where NASA has no detection). "
-            "MODIS Terra aerosol omitted — empty over this AOI for 16 Apr 2024."
+            "Gallery is reflectance-only (full-frame tiles). Sparse products "
+            "(aerosol, night lights, vapour, SST, flood flags) removed — they "
+            "were empty or mostly transparent over this AOI for 16 Apr 2024."
         ),
         "theme_split": {
-            "nasa": [LAYERS[k][3] for k in order],
+            "nasa": [LAYERS[k][3] for k in GALLERY_ORDER],
             "copernicus_theme04": ["Sentinel-1 radar", "Sentinel-2", "Copernicus DEM"],
         },
     }
