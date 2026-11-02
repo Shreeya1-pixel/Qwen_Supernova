@@ -424,6 +424,7 @@ export interface OrbitNasaTile {
   date: string;
   url: string;
   format?: string;
+  sparse?: boolean;
 }
 
 export interface OrbitNasa {

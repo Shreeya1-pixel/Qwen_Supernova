@@ -21,7 +21,7 @@ export function NasaWall({ nasa }: { nasa: OrbitNasa | null }) {
           <img
             src={hero.url}
             alt={hero.title}
-            className="max-h-[480px] w-full object-cover object-center"
+            className="max-h-[480px] w-full bg-ink object-cover object-center"
             loading="eager"
           />
         ) : (
@@ -49,7 +49,16 @@ export function NasaWall({ nasa }: { nasa: OrbitNasa | null }) {
             )}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={tile.url} alt={tile.title} className="h-24 w-full object-cover" loading="lazy" />
+            <img
+              src={tile.url}
+              alt={tile.title}
+              className={cn(
+                "h-24 w-full object-cover",
+                // Sparse PNG products are mostly transparent — dark plate so they don't read as “blank”.
+                tile.sparse || tile.format === "image/png" ? "bg-ink" : "bg-[var(--line)]",
+              )}
+              loading="lazy"
+            />
             <div className="px-2 py-1.5">
               <p className="truncate text-[0.72rem] font-bold leading-tight">{tile.title}</p>
               <p className="label truncate normal-case opacity-70">{tile.date}</p>
