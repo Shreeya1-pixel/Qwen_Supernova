@@ -86,6 +86,17 @@ Flood maps alone don’t reach a worker who doesn’t speak English and whose si
 
 ---
 
+## Reused platform (last mile around the orbit decision)
+
+Not Theme 04 scoring criteria — shows the same product can take a hazard into exposure + site action.
+
+| Live heat map · STOP WORK | Scenario · flood exercise (simulated) |
+|:---:|:---:|
+| <img src="docs/img/live-map.jpg" width="420" alt="Live map — heat layers and site STOP WORK"> | <img src="docs/img/readme/proto-scenario-live.jpg" width="420" alt="Scenario mode — simulated flood exposure"> |
+| [/map](https://qwen-supernova-2.onrender.com/map) · Open-Meteo layers · council level | [/scenario](https://qwen-supernova-2.onrender.com/scenario) · draw zone · population in/out · **not a live event** |
+
+---
+
 ## Architecture
 
 ```
