@@ -88,7 +88,7 @@ Flood maps alone don’t reach a worker who doesn’t speak English and whose si
 
 ## Reused platform (last mile around the orbit decision)
 
-Not Theme 04 scoring criteria — shows the same product can take a hazard into exposure + site action.
+Same product, beyond the orbit page: live hazards → who is exposed → site action.
 
 | Live heat map · STOP WORK | Scenario · flood exercise (simulated) |
 |:---:|:---:|
