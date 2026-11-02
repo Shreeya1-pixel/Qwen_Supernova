@@ -4,9 +4,8 @@
 
 Right now, a satellite is crossing the UAE. It sees clouds over the Hajar, ships in Hormuz, cities spreading into the sand. **Most of it goes unused.**
 
-You get **real satellite data** and one week to build something that matters — then the top 8 teams pitch live to the judges.
 
-**We built NABD Orbit** so that pass is not wasted when the next flood hits.
+**I built NABD Orbit** so that pass is not wasted when the next flood hits.
 
 > Map floods within hours, not days · Assess damage to roads and buildings · Learn from the **April 2024 UAE floods**  
 > **Data:** Sentinel-1 radar · Sentinel-2 · Copernicus DEM · **NASA GIBS** (live)
