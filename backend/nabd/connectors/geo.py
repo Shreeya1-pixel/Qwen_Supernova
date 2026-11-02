@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
 
@@ -110,9 +110,24 @@ async def heat_grid() -> dict:
         path.write_text(json.dumps(data))
     except (httpx.HTTPError, KeyError, ValueError, IndexError):
         if _heat["data"]:
-            return _heat["data"]
-        if not path.exists():
-            raise
-        data = {**json.loads(path.read_text()), "stale": True}
+            return {**_heat["data"], "stale": True}
+        if path.exists():
+            data = {**json.loads(path.read_text()), "stale": True}
+        else:
+            # Synthetic Gulf heat field so the overview map is never a black void on 429.
+            n = len(pts)
+            data = {
+                "lats": GRID_LATS,
+                "lons": GRID_LONS,
+                "time": datetime.utcnow().strftime("%Y-%m-%dT%H:00"),
+                "values": {
+                    "temperature_2m": [36.0] * n,
+                    "apparent_temperature": [40.0] * n,
+                    "wet_bulb_temperature_2m": [28.0] * n,
+                    "relative_humidity_2m": [45.0] * n,
+                },
+                "source": "synthetic fallback (Open-Meteo rate-limited)",
+                "stale": True,
+            }
     _heat.update(at=time.time(), data=data)
     return data

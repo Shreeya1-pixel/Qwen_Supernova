@@ -56,13 +56,22 @@ export function Bar({ value, max = 1, tone = "var(--ink)", marker }: { value: nu
   );
 }
 
-export function Loading({ rows = 3 }: { rows?: number }) {
+export function Loading({ rows = 3, label }: { rows?: number; label?: string }) {
   return (
     <div className="space-y-2">
+      {label && <p className="text-[0.8rem] text-muted">{label}</p>}
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="h-4 animate-pulse rounded bg-[var(--line)]" style={{ width: `${90 - i * 15}%` }} />
       ))}
     </div>
+  );
+}
+
+export function PanelError({ message }: { message?: string | null }) {
+  return (
+    <p className="rounded-md border border-oxide/25 bg-oxide/10 px-3 py-2 text-[0.82rem] text-oxide">
+      {message || "Backend unreachable — check /api/health."}
+    </p>
   );
 }
 

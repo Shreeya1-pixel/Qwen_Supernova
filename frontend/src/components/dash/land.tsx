@@ -7,7 +7,7 @@ import { Spark } from "@/components/viz/spark";
 import { ExposureFlow } from "@/components/viz/exposure-flow";
 import { ScenarioPathway } from "@/components/sections/scenario-pathway";
 import { UaeMap, type MapLayer, type MapRes } from "@/components/viz/uae-map";
-import { Bar, LevelPill, Loading, Panel, riskTone } from "./ui";
+import { Bar, LevelPill, Loading, Panel, PanelError, riskTone } from "./ui";
 
 const LAYERS: { id: MapLayer; key: "land.outline" | "land.truecolor" | "land.lst" | "land.aod" }[] = [
   { id: "truecolor", key: "land.truecolor" },
@@ -123,7 +123,7 @@ export function SitesTable({ className }: { className?: string }) {
 }
 
 export function TrendPanel({ className, height = 150 }: { className?: string; height?: number }) {
-  const { snapshot: s, t } = useNabd();
+  const { snapshot: s, error, t } = useNabd();
   const series = s?.index.series ?? [];
   const wb = s?.raw.series.wet_bulb_temperature_2m ?? [];
   return (
@@ -142,7 +142,7 @@ export function TrendPanel({ className, height = 150 }: { className?: string; he
       }
     >
       {!s ? (
-        <Loading />
+        error ? <PanelError message={error} /> : <Loading />
       ) : (
         <>
           <Spark
@@ -169,11 +169,11 @@ export function TrendPanel({ className, height = 150 }: { className?: string; he
 const HAZARD_NAME: Record<string, string> = { heat: "Heat", dust: "Dust", air: "Air", sea_warming: "Sea", uv: "UV", flood: "Flood" };
 
 export function DriversPanel({ className }: { className?: string }) {
-  const { snapshot: s, t } = useNabd();
+  const { snapshot: s, error, t } = useNabd();
   return (
     <Panel title={t("dash.drivers")} className={className}>
       {!s ? (
-        <Loading />
+        error ? <PanelError message={error} /> : <Loading />
       ) : (
         <div className="flex flex-1 flex-col justify-between gap-4">
           <ul className="space-y-2.5">
@@ -216,11 +216,11 @@ const STATUS = {
 } as const;
 
 export function SignalsPanel({ className, detailed = false }: { className?: string; detailed?: boolean }) {
-  const { snapshot: s, t } = useNabd();
+  const { snapshot: s, error, t } = useNabd();
   return (
     <Panel title={t("dash.signals")} action={<span className="label">AR(1) · variance · Kendall τ</span>} className={className}>
       {!s ? (
-        <Loading />
+        error ? <PanelError message={error} /> : <Loading />
       ) : (
         <ul className="divide-y divide-[var(--line)]">
           {s.early_warning.map((e) => (
@@ -265,13 +265,13 @@ export function SignalsPanel({ className, detailed = false }: { className?: stri
 }
 
 export function ExposedPanel({ className, graph = false }: { className?: string; graph?: boolean }) {
-  const { snapshot: s, t } = useNabd();
+  const { snapshot: s, error, t } = useNabd();
   const cohorts = s?.exposure?.cohorts ?? [];
   const calm = Boolean(s?.exposure?.calm) || (cohorts.length > 0 && cohorts.every((c) => c.risk < 0.01));
   return (
     <Panel title={t("dash.exposed")} className={className} action={calm && s ? <span className="label">clear</span> : undefined}>
       {!s ? (
-        <Loading />
+        error ? <PanelError message={error} /> : <Loading />
       ) : graph ? (
         <ExposureFlow graph={s.exposure.graph} heads={{ hazard: t("reach.hazard"), pathway: t("reach.pathway"), cohort: t("reach.cohort"), outcome: t("reach.outcome") }} />
       ) : cohorts.length === 0 ? (

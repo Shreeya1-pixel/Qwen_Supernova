@@ -75,7 +75,11 @@ async def sites(replay: str | None = None):
                 "warning": next((w["key"] for w in snap["early_warning"] if w["status"] != "stable"), None),
                 "stale": snap["stale"], "as_of": snap["as_of"]}
     replay = _valid_replay(replay)
-    return {"sites": await asyncio.gather(*(one(s) for s in SITES))}
+    # Sequential — parallel snapshots stampede Open-Meteo and 429 on Render free tier.
+    out = []
+    for site_id in SITES:
+        out.append(await one(site_id))
+    return {"sites": out}
 
 
 @app.get("/api/sites/{site_id}")
