@@ -5,36 +5,45 @@
 **Live demo:** [https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com) · cold-start ~30–60s on free Render.  
 **Demo video:** [Google Drive](https://drive.google.com/drive/folders/10RjlP-vZgU97e-VpDHzhiybuU0HiYyhU?usp=sharing)
 
-| Differentiator | What judges can open |
-|---|---|
-| **① Satellite** | Live **NASA GIBS** wall · Sentinel-1/2 · Copernicus DEM (STAC) · S1 flood mask · Overture triage → [/orbit](https://qwen-supernova-2.onrender.com/orbit) |
-| **② Multilingual** | **8 languages** · on-device **codeswitch** intake (no LLM) · EN/AR UI + RTL → [/messages](https://qwen-supernova-2.onrender.com/messages) |
-| **③ Offline** | **21-byte** signed BLE-sized frame (what handsets would carry) · demo radio = **BroadcastChannel** → [/alerts](https://qwen-supernova-2.onrender.com/alerts) |
+**Pitch:** NABD (نبض, *pulse*) turns a satellite overpass into a first-responder flood + damage view, then gets the decision to outdoor workers in their language — even when the site has no internet.
+
+**Who:** emergency / site coordinators and the multilingual outdoor workforce they protect.  
+**Problem:** after the **April 2024 UAE floods**, warnings existed, but responders still needed *where the water was* and *which roads and buildings were cut* within hours — not after optical clear (~2 days) — and crews still needed alerts they could read offline.
 
 <p align="center"><img src="docs/img/overview.jpg" width="720" alt="NABD operations overview"></p>
 
 ---
 
-## Theme 04 payload (April 2024 worked example)
+## Theme 04 — what we ship for the ask
 
 | Theme ask | What NABD ships |
 |---|---|
-| **Map floods in hours** | Precomputed **Sentinel-1 RTC** before/after change mask (VV **−3 dB** change · **−15 dB** dark). Scene IDs stored + pytest-checked. Live **STAC** lists the S1/S2/DEM catalogue. |
+| **Map floods in hours** | Precomputed **Sentinel-1 RTC** before/after change mask (VV **−3 dB** change · **−15 dB** dark). Scene IDs stored + pytest-checked. Live **STAC** lists the S1/S2/DEM catalogue. Timeline scrubber uses **T+N** = hours after onset (e.g. **T+6** = six hours into the event). |
 | **Damage to roads & buildings** | Flood GeoJSON scored against roads/buildings + **3,000+** real Overture hospitals/schools/clinics. |
 | **Learn from April 2024** | Event briefing, archive rainfall, NASA GIBS week gallery, Hatta early-warning backtest (**39 h** lead on archived forecasts). |
 | **Theme data** | Sentinel-1 · Sentinel-2 · Copernicus DEM (Element84 STAC) + NASA GIBS WMS (keyless). |
 
-**Stack:** FastAPI + Next.js · one Docker image on Render · pytest suite on the critical engines.
-
-**Honest limits (judges will ask):** flood mask is **unvalidated** (offline-precomputed from real S1 RTC pairs — not a live timed SAR job; km² includes morphological smoothing); **T+4 / T+6** vs ~**T+48** optical are **design targets** only; offline demo uses browser **BroadcastChannel** with simulated range — not real Bluetooth LE.
+**Honest limits:** flood mask is **unvalidated** (offline-precomputed from real S1 RTC pairs — not a live timed SAR job; km² includes morphological smoothing). **T+4 / T+6** vs ~**T+48** optical are **design targets**, not wall-clock of this repo. Offline demo radio is browser **BroadcastChannel** with simulated range — not real Bluetooth LE.
 
 ---
 
-## Judge path (2 minutes — hit all three pillars)
+## Built for this hackathon vs reused platform
 
-1. **Satellite →** [/orbit](https://qwen-supernova-2.onrender.com/orbit) — NASA wall · S1 phases **T+0 → T+6 → T+12** · Overture triage  
-2. **Multilingual →** [/messages](https://qwen-supernova-2.onrender.com/messages) — type mixed-language symptoms · council reacts  
-3. **Offline →** [/alerts](https://qwen-supernova-2.onrender.com/alerts) — fire a 21-byte frame · tabs update via BroadcastChannel (BLE stand-in)  
+| Built / extended for Theme 04 (this weekend’s EO path) | Reused from the earlier NABD safety platform |
+|---|---|
+| `/orbit` UI + `/api/orbit/*` — NASA GIBS wall, STAC scenes, S1 flood GeoJSON + provenance, Overture triage, rainfall, phase timeline | Live weather fusion `/api/sites/*`, hazard bands, **council**, **exposure graph**, crew strain |
+| S1 RTC precompute script + stored scene-ID tests | Multilingual **codeswitch** intake, EN/AR + RTL UI |
+| Render Docker deploy for the combined app | **21-byte** signed alert frame + mesh demo; Mirage trust / audit hash chain |
+
+Judges should score Theme 04 on **`/orbit` + EO APIs**. The safety stack shows the same product can take an orbit decision to the last mile.
+
+---
+
+## Judge path (2 minutes)
+
+1. **Satellite →** [/orbit](https://qwen-supernova-2.onrender.com/orbit) — NASA wall · scrub **T+0 → T+6 → T+12** (hours after onset) · Overture triage  
+2. **Multilingual →** [/messages](https://qwen-supernova-2.onrender.com/messages) — type mixed-language symptoms (**codeswitch** = one message mixing languages; parsed on-device, no LLM) · **council** reacts (rule engine: land × body × data integrity → SAFE / WATCH / STOP_WORK)  
+3. **Offline →** [/alerts](https://qwen-supernova-2.onrender.com/alerts) — fire a **21-byte** signed frame (fits a BLE advertisement, so the same bytes could reach phones with **no internet**). In this demo, browser tabs update via **BroadcastChannel** as a stand-in for BLE.  
 4. Smoke APIs:
 
 ```bash
@@ -46,7 +55,34 @@ curl -s "https://qwen-supernova-2.onrender.com/api/orbit/facilities?phase_id=t6"
 
 ---
 
-## Architecture (what actually runs)
+## Evidence — from orbit
+
+| NASA / EO | Prototype (live Render) |
+|:---:|:---:|
+| <img src="docs/img/nasa-false721.jpg" width="360" alt="MODIS false colour"> | <img src="docs/img/readme/proto-orbit-live.jpg" width="360" alt="Orbit response with NASA GIBS wall"> |
+| False-colour GIBS (live WMS) | `/orbit` — NASA wall + KPIs |
+
+Also: live STAC → `GET /api/orbit/scenes`. Mask provenance → scene IDs in GeoJSON + `pytest` (`test_flood_mask_comes_from_stored_scene_ids`).
+
+<p align="center"><img src="docs/img/validation-flood.png" width="640" alt="Hatta April 2024 flood early-warning backtest"></p>
+<sub>Hatta backtest: archived forecasts only — **39 h** lead before the flood threshold (observations alone ≈ 3 h). Engine is tested for **no look-ahead**.</sub>
+
+---
+
+## Evidence — multilingual + offline last mile
+
+Flood maps alone don’t reach a worker who doesn’t speak English and whose site lost connectivity. NABD carries the decision the last mile.
+
+| Multilingual | Offline last mile |
+|:---:|:---:|
+| <img src="docs/img/messages.jpg" width="420" alt="Messages — multilingual intake + council"> | <img src="docs/img/alerts.jpg" width="420" alt="Alerts — 21-byte frames + phone mesh"> |
+| [/messages](https://qwen-supernova-2.onrender.com/messages) · **8 languages** · codeswitch · no LLM | [/alerts](https://qwen-supernova-2.onrender.com/alerts) · **21 bytes** ≈ BLE advert payload · demo = BroadcastChannel |
+
+**Why 21 bytes:** a Bluetooth LE advertisement is tiny. Packing site, level, action, and time into **21 signed bytes** means the *same* frame can hop phone-to-phone without pairing or internet. This repo demos the frame + relay logic in-browser; it does **not** claim a field BLE test.
+
+---
+
+## Architecture
 
 ```
 Browser (Next.js)
@@ -54,10 +90,18 @@ Browser (Next.js)
     ▼
 FastAPI (nabd)
     ├── /api/orbit/*     Theme 04 — GIBS, STAC, S1 mask GeoJSON, Overture triage
-    ├── /api/sites/*     Live Open-Meteo fusion → hazards → exposure graph → council
-    ├── intake / alerts  Codeswitch + 21-byte signed frames (BroadcastChannel demo / BLE-sized)
+    ├── /api/sites/*     Weather fusion → hazards → exposure graph → council
+    ├── intake / alerts  Codeswitch + 21-byte signed frames (BroadcastChannel demo)
     └── audit            Hash-chained decision log
 ```
+
+| Term | Meaning |
+|---|---|
+| **Council** | Deterministic rule engine that fuses land hazard, worker body strain, and data integrity into one action level (never auto-clears untrusted data). |
+| **Exposure graph** | Who is downstream of which hazard (cohorts / pathways / outcomes). |
+| **Mirage red-team** | Automated attacks on sensor packets (forgery, replay, clone swarm) to prove the trust layer rejects them. |
+| **Codeswitch** | One utterance mixing languages (e.g. Hindi + English); lexicon match on-device. |
+| **T+N** | Hours after flood onset on the scrubber (T+0 first heavy band → T+6 damage triage target). |
 
 | Layer | Implementation |
 |---|---|
@@ -65,43 +109,12 @@ FastAPI (nabd)
 | **NASA context** | GIBS WMS GetMap (reflectance gallery for 14–17 Apr 2024) |
 | **Flood mask** | Offline S1 RTC VV change detection → `backend/nabd/data/s1_flood_mask_apr2024.geojson` + provenance JSON |
 | **Critical places** | Overture Maps places extract (hospitals / schools / clinics) |
-| **Weather** | Open-Meteo forecast + air + marine; disk/memory cache; synthetic fallback on HTTP 429 |
+| **Weather** | Open-Meteo; disk/memory cache; synthetic fallback on HTTP 429 |
 | **Trust** | Signed packets, Mirage red-team, council never auto-clears untrusted data |
 
+**Stack:** FastAPI + Next.js · one Docker image on Render · pytest on the critical engines.
+
 <p align="center"><img src="docs/img/architecture_slide.png" width="640" alt="Architecture"></p>
-
----
-
-## The problem
-
-**April 2024:** record UAE rain (**254.8 mm** in &lt;24 h). Warnings existed; responders still needed **where the water was** and **which assets were cut** — in hours, not after optical clear (~2 days).
-
-<p align="center"><img src="docs/img/validation-flood.png" width="640" alt="Hatta April 2024 flood early-warning backtest"></p>
-<sub>Hatta backtest: archived forecasts only — **39 h** lead before the flood threshold (observations alone ≈ 3 h). Engine is tested for **no look-ahead**.</sub>
-
----
-
-## From orbit — evidence on the page
-
-| NASA / EO | Prototype (live Render) |
-|:---:|:---:|
-| <img src="docs/img/nasa-false721.jpg" width="360" alt="MODIS false colour"> | <img src="docs/img/readme/proto-orbit-live.jpg" width="360" alt="Orbit response with NASA GIBS wall"> |
-| False-colour GIBS (live WMS) | `/orbit` — NASA wall + KPIs (Engines online) |
-
-Also: live STAC scenes → `GET /api/orbit/scenes`. Mask provenance → scene IDs in GeoJSON properties + `pytest` (`test_flood_mask_comes_from_stored_scene_ids`).
-
----
-
-## ② Multilingual + ③ Offline (evidence)
-
-Peers can also replay Hatta 2024. NABD still ships the **last mile**: workers speak many languages, and sites lose connectivity.
-
-| ② Multilingual | ③ Offline last mile |
-|:---:|:---:|
-| <img src="docs/img/messages.jpg" width="420" alt="Messages — multilingual intake + council"> | <img src="docs/img/alerts.jpg" width="420" alt="Alerts — 21-byte frames + phone mesh"> |
-| [/messages](https://qwen-supernova-2.onrender.com/messages) · 8 languages · codeswitch · no LLM | [/alerts](https://qwen-supernova-2.onrender.com/alerts) · 21-byte signed · demo = BroadcastChannel; frame is what handsets would carry |
-
-Also under the hood: deterministic council (land × body × integrity) · exposure graph · audit hash chain · weather cache so free-tier 429s don’t blank Overview.
 
 ---
 
@@ -127,7 +140,7 @@ cd frontend && npm install && npm run dev
 |---|---|
 | http://127.0.0.1:3848/orbit | Theme 04 primary page |
 | http://127.0.0.1:8040/api/health | API health |
-| http://127.0.0.1:3848/alerts | Off-grid relay |
+| http://127.0.0.1:3848/alerts | Off-grid relay demo |
 | http://127.0.0.1:3848/messages | Multilingual intake |
 
 ```bash
