@@ -2,9 +2,9 @@
 
 **Supernova × SpacePoint · Theme 04 — First Responders from Orbit**
 
-NABD maps April 2024 UAE floods from orbit in hours: Sentinel-1 flood mask, NASA GIBS context, and Overture triage of roads and critical places.  
-Live stack is Sentinel-1 / Sentinel-2 / Copernicus DEM (STAC) + NASA GIBS + Overture — FastAPI + Next.js on one Render image.  
-Honest limits: unvalidated offline S1 mask; **T+4 / T+6** are design targets only.
+NABD is the **satellite → multilingual → offline** responder stack: live **NASA GIBS** + Sentinel-1/2 + Copernicus DEM, **8-language** codeswitch intake, and **21-byte** signed alerts that hop phone-to-phone with no internet.  
+April 2024 UAE / Hatta floods are the worked example (S1 flood mask + Overture triage) — not the whole product.  
+Honest limits: flood mask is offline-precomputed and **unvalidated**; **T+4 / T+6** are design targets only.
 
 **Live demo:** [https://qwen-supernova-2.onrender.com/orbit](https://qwen-supernova-2.onrender.com/orbit)  
 <sub>Free-tier Render may cold-start ~30–60s. If Overview looks empty on first hit, wait and refresh — `/api/health` and `/orbit` are the judge path.</sub>
