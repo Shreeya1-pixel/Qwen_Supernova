@@ -5,12 +5,29 @@
 **Live demo:** [https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com) · cold-start ~30–60s on free Render.  
 **Demo video:** [Google Drive](https://drive.google.com/drive/folders/10RjlP-vZgU97e-VpDHzhiybuU0HiYyhU?usp=sharing)
 
-**Pitch:** NABD (نبض, *pulse*) turns a satellite overpass into a first-responder flood + damage view, then gets the decision to outdoor workers in their language — even when the site has no internet.
+**Pitch:** NABD (نبض, *pulse*) turns a satellite overpass into a first-responder flood + damage view, then gets the decision to outdoor workers in their language — even when the site has no internet.  
+**Score Theme 04 on [`/orbit`](https://qwen-supernova-2.onrender.com/orbit) + EO APIs;** the safety stack is the reused last mile ([built vs reused](#built-for-this-hackathon-vs-reused-platform)).
 
 **Who:** emergency / site coordinators and the multilingual outdoor workforce they protect.  
 **Problem:** after the **April 2024 UAE floods**, warnings existed, but responders still needed *where the water was* and *which roads and buildings were cut* within hours — not after optical clear (~2 days) — and crews still needed alerts they could read offline.
 
+| Pillar | Open | What to click (2 min) |
+|---|---|---|
+| **Satellite** | [/orbit](https://qwen-supernova-2.onrender.com/orbit) | NASA wall · scrub **T+0 → T+6 → T+12** (hours after onset) · Overture triage |
+| **Multilingual** | [/messages](https://qwen-supernova-2.onrender.com/messages) | Type mixed-language symptoms (**codeswitch** = one message mixing languages; on-device, no LLM) · watch the **council** (rule engine: land × body × data integrity → SAFE / WATCH / STOP_WORK; never auto-clears untrusted data) |
+| **Offline** | [/alerts](https://qwen-supernova-2.onrender.com/alerts) | Fire a **21-byte** signed frame (fits a BLE advert → phones with no internet). Demo radio = **BroadcastChannel**, not real BLE |
+
 <p align="center"><img src="docs/img/overview.jpg" width="720" alt="NABD operations overview"></p>
+
+---
+
+## Built for this hackathon vs reused platform
+
+| Built / extended for Theme 04 (this weekend’s EO path) | Reused from the earlier NABD safety platform |
+|---|---|
+| `/orbit` UI + `/api/orbit/*` — NASA GIBS wall, STAC scenes, S1 flood GeoJSON + provenance, Overture triage, rainfall, phase timeline | Live weather fusion `/api/sites/*`, hazard bands, **council**, **exposure graph**, crew strain |
+| S1 RTC precompute script + stored scene-ID tests | Multilingual **codeswitch** intake, EN/AR + RTL UI |
+| Render Docker deploy for the combined app | **21-byte** signed alert frame + mesh demo; Mirage trust / audit hash chain |
 
 ---
 
@@ -23,28 +40,15 @@
 | **Learn from April 2024** | Event briefing, archive rainfall, NASA GIBS week gallery, Hatta early-warning backtest (**39 h** lead on archived forecasts). |
 | **Theme data** | Sentinel-1 · Sentinel-2 · Copernicus DEM (Element84 STAC) + NASA GIBS WMS (keyless). |
 
-**Honest limits:** flood mask is **unvalidated** (offline-precomputed from real S1 RTC pairs — not a live timed SAR job; km² includes morphological smoothing). **T+4 / T+6** vs ~**T+48** optical are **design targets**, not wall-clock of this repo. Offline demo radio is browser **BroadcastChannel** with simulated range — not real Bluetooth LE.
+**Honest limits**
+
+- Flood mask is **unvalidated** — offline-precomputed from real S1 RTC pairs (not a live timed SAR job); km² includes morphological smoothing.
+- **T+4 / T+6** vs ~**T+48** optical are **design targets**, not wall-clock of this repo.
+- Offline demo radio is browser **BroadcastChannel** with simulated range — **not** real Bluetooth LE.
 
 ---
 
-## Built for this hackathon vs reused platform
-
-| Built / extended for Theme 04 (this weekend’s EO path) | Reused from the earlier NABD safety platform |
-|---|---|
-| `/orbit` UI + `/api/orbit/*` — NASA GIBS wall, STAC scenes, S1 flood GeoJSON + provenance, Overture triage, rainfall, phase timeline | Live weather fusion `/api/sites/*`, hazard bands, **council**, **exposure graph**, crew strain |
-| S1 RTC precompute script + stored scene-ID tests | Multilingual **codeswitch** intake, EN/AR + RTL UI |
-| Render Docker deploy for the combined app | **21-byte** signed alert frame + mesh demo; Mirage trust / audit hash chain |
-
-Judges should score Theme 04 on **`/orbit` + EO APIs**. The safety stack shows the same product can take an orbit decision to the last mile.
-
----
-
-## Judge path (2 minutes)
-
-1. **Satellite →** [/orbit](https://qwen-supernova-2.onrender.com/orbit) — NASA wall · scrub **T+0 → T+6 → T+12** (hours after onset) · Overture triage  
-2. **Multilingual →** [/messages](https://qwen-supernova-2.onrender.com/messages) — type mixed-language symptoms (**codeswitch** = one message mixing languages; parsed on-device, no LLM) · **council** reacts (rule engine: land × body × data integrity → SAFE / WATCH / STOP_WORK)  
-3. **Offline →** [/alerts](https://qwen-supernova-2.onrender.com/alerts) — fire a **21-byte** signed frame (fits a BLE advertisement, so the same bytes could reach phones with **no internet**). In this demo, browser tabs update via **BroadcastChannel** as a stand-in for BLE.  
-4. Smoke APIs:
+## Judge path — smoke APIs
 
 ```bash
 curl -s https://qwen-supernova-2.onrender.com/api/health
@@ -97,10 +101,10 @@ FastAPI (nabd)
 
 | Term | Meaning |
 |---|---|
-| **Council** | Deterministic rule engine that fuses land hazard, worker body strain, and data integrity into one action level (never auto-clears untrusted data). |
+| **Council** | Deterministic rule engine: land × body × data integrity → SAFE / WATCH / STOP_WORK; never auto-clears untrusted data. |
 | **Exposure graph** | Who is downstream of which hazard (cohorts / pathways / outcomes). |
 | **Mirage red-team** | Automated attacks on sensor packets (forgery, replay, clone swarm) to prove the trust layer rejects them. |
-| **Codeswitch** | One utterance mixing languages (e.g. Hindi + English); lexicon match on-device. |
+| **Codeswitch** | One utterance mixing languages (e.g. Hindi + English); lexicon match on-device, no LLM. |
 | **T+N** | Hours after flood onset on the scrubber (T+0 first heavy band → T+6 damage triage target). |
 
 | Layer | Implementation |
@@ -114,7 +118,7 @@ FastAPI (nabd)
 
 **Stack:** FastAPI + Next.js · one Docker image on Render · pytest on the critical engines.
 
-<p align="center"><img src="docs/img/architecture_slide.png" width="640" alt="Architecture"></p>
+<p align="center"><img src="docs/img/architecture_slide.png" width="640" alt="NABD data flow: inputs → FastAPI engines → dashboard and alerts"></p>
 
 ---
 
@@ -151,7 +155,7 @@ cd backend && source .venv/bin/activate && pytest -q
 
 ## Tests (technically checkable)
 
-**20 passed** in CI-local suite, including:
+**20 tests pass locally**, including:
 
 | Area | Coverage |
 |---|---|
