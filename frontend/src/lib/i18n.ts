@@ -232,7 +232,7 @@ const en = {
   "orbit.deliver": "Theme 04 deliverables",
   "orbit.loading": "Loading…",
   "orbit.honest":
-    "Honest note: flood polygons are prototype SAR-style extents calibrated to reported April 2024 corridors. Live STAC lists real Sentinel-1/2 scenes over the AOI; Overpass lists real OSM assets. WhatsApp is optional last-mile only — not a Theme 04 scoring pillar.",
+    "Honest note: flood polygons are a precomputed Sentinel-1 RTC change mask (VV −3 dB / −15 dB) from stored April 2024 scene IDs — not a live SAR job. Live STAC lists real Sentinel-1/2 scenes; Overture/Overpass list real assets. WhatsApp is optional last-mile only — not a Theme 04 scoring pillar.",
   "orbit.eo": "Theme 04 data · live catalogue",
   "orbit.eoWhy": "Sentinel-1 radar · Sentinel-2 · Copernicus DEM — map floods in hours, not days.",
   "orbit.s1": "Sentinel-1 radar",

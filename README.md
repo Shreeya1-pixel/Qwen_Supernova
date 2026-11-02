@@ -110,7 +110,7 @@ Also live: **Sentinel-1 / Sentinel-2 / Copernicus DEM** STAC catalogue → `GET 
 <p align="center"><img src="docs/img/live-map.jpg" width="640" alt="Live UAE map"></p>
 <p align="center"><img src="docs/img/architecture_slide.png" width="640" alt="Architecture"></p>
 
-**Honest:** flood polygons are prototype SAR-style extents (not a full in-repo S1 change-detection job). **T+4 / T+6** are design targets vs ~T+48 optical clear, not measured wall-clock.
+**Honest:** flood polygons are a **precomputed Sentinel-1 RTC change mask** (VV −3 dB / −15 dB) from stored April 2024 scene IDs — not a live SAR processor. **T+4 / T+6** are design targets vs ~T+48 optical clear, not measured wall-clock.
 
 ---
 

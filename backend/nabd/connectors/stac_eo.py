@@ -72,8 +72,8 @@ async def _search(collections: list[str], limit: int = 8, *, timed: bool = True)
             "stale": False,
             "note": (
                 "Live catalogue hits for the April 2024 UAE flood window. "
-                "These are real Sentinel products over the AOI; water masks in "
-                "/orbit are prototype extents calibrated to reported corridors."
+                "These are real Sentinel products over the AOI; /orbit loads a "
+                "precomputed S1 RTC change mask (stored scene IDs) — not a live SAR job."
             ),
         }
     except (httpx.HTTPError, KeyError, ValueError, TypeError) as exc:

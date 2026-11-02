@@ -29,3 +29,12 @@ def test_phase_lookup():
     out = orbit_response.overview("t12")
     assert out["phase"]["id"] == "t12"
     assert out["phase"]["kpis"]["zones_active"] == 2
+
+
+def test_flood_mask_comes_from_stored_scene_ids():
+    """Mask polygons must cite the same S1 scene IDs stored in provenance."""
+    prov = orbit_response.flood_provenance()
+    feats = orbit_response.load_flood_mask()["features"]
+    assert feats and set(f["properties"]["before_scene_id"] for f in feats) | set(
+        f["properties"]["after_scene_id"] for f in feats
+    ) <= set(prov["scene_ids"])

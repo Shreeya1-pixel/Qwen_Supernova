@@ -1,0 +1,40 @@
+{
+  "before_scene_ids": [
+    "S1A_IW_GRDH_1SDV_20240403T021553_20240403T021616_053263_0674A7_rtc",
+    "S1A_IW_GRDH_1SDV_20240407T141702_20240407T141727_053329_067746_rtc"
+  ],
+  "after_scene_ids": [
+    "S1A_IW_GRDH_1SDV_20240415T021552_20240415T021616_053438_067B9A_rtc",
+    "S1A_IW_GRDH_1SDV_20240419T141702_20240419T141727_053504_067E38_rtc"
+  ],
+  "scene_ids": [
+    "S1A_IW_GRDH_1SDV_20240403T021553_20240403T021616_053263_0674A7_rtc",
+    "S1A_IW_GRDH_1SDV_20240407T141702_20240407T141727_053329_067746_rtc",
+    "S1A_IW_GRDH_1SDV_20240415T021552_20240415T021616_053438_067B9A_rtc",
+    "S1A_IW_GRDH_1SDV_20240419T141702_20240419T141727_053504_067E38_rtc"
+  ],
+  "change_db_threshold": -3.0,
+  "dark_db_threshold": -15.0,
+  "feature_count": 43,
+  "zones": {
+    "dubai-south": {
+      "pixels": 1008,
+      "polygons": 30,
+      "km2": 7.228,
+      "before_scene_id": "S1A_IW_GRDH_1SDV_20240403T021553_20240403T021616_053263_0674A7_rtc",
+      "after_scene_id": "S1A_IW_GRDH_1SDV_20240415T021552_20240415T021616_053438_067B9A_rtc",
+      "before_datetime": "2024-04-03T02:16:04.940430Z",
+      "after_datetime": "2024-04-15T02:16:04.467057Z"
+    },
+    "hatta": {
+      "pixels": 124,
+      "polygons": 13,
+      "km2": 1.576,
+      "before_scene_id": "S1A_IW_GRDH_1SDV_20240407T141702_20240407T141727_053329_067746_rtc",
+      "after_scene_id": "S1A_IW_GRDH_1SDV_20240419T141702_20240419T141727_053504_067E38_rtc",
+      "before_datetime": "2024-04-07T14:17:14.774387Z",
+      "after_datetime": "2024-04-19T14:17:15.077218Z"
+    }
+  },
+  "geojson": "s1_flood_mask_apr2024.geojson"
+}
