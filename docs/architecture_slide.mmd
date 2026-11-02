@@ -1,0 +1,33 @@
+flowchart LR
+  subgraph A["1 · Inputs"]
+    direction LR
+    a1["Open-Meteo<br/>weather · air · marine"]
+    a2["NASA GIBS · EONET<br/>satellite · events"]
+    a3["OpenStreetMap · WorldPop<br/>boundaries · population"]
+    a4["Wearables<br/>WHOOP · Apple Watch (planned)"]
+    a5["Signed field sensors"]
+  end
+  subgraph B["2 · Backend · FastAPI (Python)"]
+    direction TB
+    b1["connectors/<br/>fetch · cache · fallback"]
+    b2["engines (deterministic)<br/>Nabd Index · tipping-point stats<br/>exposure graph · personal line<br/>exposure watch · backtest"]
+    b3["Council<br/>3 independent checks"]
+    b4["Playbooks + audit chain"]
+    b1 --> b2 --> b3 --> b4
+  end
+  subgraph C["3 · Frontend · Next.js · React"]
+    direction LR
+    c1["Dashboard<br/>Overview · Signals · Crew · Audit"]
+    c2["Live map<br/>MapLibre"]
+    c3["Scenario mode<br/>Turf.js · exposure watch"]
+    c4["EN / AR"]
+  end
+  subgraph D["4 · Alerts out"]
+    direction LR
+    d1["WhatsApp<br/>8 languages (demo)"]
+    d2["Off-grid relay<br/>phone to phone"]
+    d3["Supervisor briefing<br/>Gemini, text only"]
+  end
+  A --> B
+  B -->|REST JSON /api| C
+  B --> D
