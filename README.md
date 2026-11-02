@@ -28,7 +28,7 @@
 
 **Stack:** FastAPI + Next.js · one Docker image on Render · pytest suite on the critical engines.
 
-**Honest limits (judges will ask):** the flood polygons are **offline-precomputed** from real S1 pairs — not a live timed SAR processor. **T+4 / T+6** vs ~**T+48** optical are **design targets**, not wall-clock of this repo.
+**Honest limits (judges will ask):** weaknesses are an **unvalidated** flood mask (offline-precomputed from real S1 RTC pairs — not a live timed SAR processor, not field-checked) and **T+4 / T+6** vs ~**T+48** optical figures that are only **design targets**, not wall-clock of this repo.
 
 ---
 
@@ -86,10 +86,12 @@ FastAPI (nabd)
 
 ## From orbit — evidence on the page
 
-| NASA / EO | Prototype |
+| NASA / EO | Prototype (live Render) |
 |:---:|:---:|
-| <img src="docs/img/nasa-false721.jpg" width="360" alt="MODIS false colour"> | <img src="docs/img/readme/proto-orbit.jpg" width="360" alt="Orbit response UI"> |
-| False-colour GIBS (live WMS) | `/orbit` flood timeline + triage |
+| <img src="docs/img/nasa-false721.jpg" width="360" alt="MODIS false colour"> | <img src="docs/img/readme/proto-orbit-live.jpg" width="360" alt="Orbit response with NASA GIBS wall"> |
+| False-colour GIBS (live WMS) | `/orbit` — NASA wall + KPIs (Engines online) |
+
+<p align="center"><img src="docs/img/readme/proto-orbit-live.jpg" width="720" alt="Orbit response — NASA GIBS wall live on Render"></p>
 
 Also: live STAC scenes → `GET /api/orbit/scenes`. Mask provenance → scene IDs in GeoJSON properties + `pytest` (`test_flood_mask_comes_from_stored_scene_ids`).
 

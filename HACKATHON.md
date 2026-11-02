@@ -16,8 +16,8 @@ Right now, a satellite is crossing the UAE. It sees clouds over the Hajar, ships
 ## Honest pitch lines
 
 - **NASA:** yes — live GIBS WMS satellite wall (flood product, false-colour, night lights, …) at `/api/orbit/nasa`.  
-- **Flood mask:** precomputed Sentinel-1 RTC change mask (VV −3 dB / −15 dB) from stored April 2024 scene IDs — offline, not a live SAR job.  
-- **T+4 / T+6:** design targets vs ~T+48 optical — **not** measured wall-clock.  
+- **Flood mask:** precomputed Sentinel-1 RTC change mask (VV −3 dB / −15 dB) from stored April 2024 scene IDs — offline, **unvalidated** in the field, not a live SAR job.  
+- **T+4 / T+6:** design targets only vs ~T+48 optical — **not** measured wall-clock.  
 - **Damage:** **3,000+** real Overture critical places triaged against the mask.
 
 **Live:** https://qwen-supernova-2.onrender.com/orbit  
