@@ -12,7 +12,8 @@ Honest limits: flood mask is offline-precomputed, **unvalidated**, and km² incl
 | **② Multilingual** | **8 languages** · on-device **codeswitch** intake (no LLM) · EN/AR UI + RTL → [/messages](https://qwen-supernova-2.onrender.com/messages) |
 | **③ Offline** | **21-byte** signed BLE-sized frame (what handsets would carry) · demo radio = **BroadcastChannel** → [/alerts](https://qwen-supernova-2.onrender.com/alerts) |
 
-**Live demo:** [https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com) · cold-start ~30–60s on free Render.
+**Live demo:** [https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com) · cold-start ~30–60s on free Render.  
+**Demo video:** [Google Drive](https://drive.google.com/drive/folders/10RjlP-vZgU97e-VpDHzhiybuU0HiYyhU?usp=sharing)
 
 <p align="center"><img src="docs/img/overview.jpg" width="720" alt="NABD operations overview"></p>
 
