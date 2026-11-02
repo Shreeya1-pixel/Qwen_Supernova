@@ -14,7 +14,7 @@ DATA = Path(__file__).resolve().parents[1] / "data" / "overture_facilities_uae.j
 RELEASE = "2026-10-21.0"
 AOI = {"west": 54.9, "south": 24.6, "east": 56.5, "north": 25.5}
 
-# Categories we treat as first-responder critical (aligned with Kestrel-style scan).
+# Categories treated as first-responder critical (hospitals, schools, clinics, …).
 CRITICAL_SUBSTRINGS = (
     "hospital", "school", "clinic", "college", "university", "preschool",
     "elementary", "high_school", "place_of_learning", "pharmacy",
