@@ -37,9 +37,9 @@ const GROUPS: { head: TKey; items: { href: string; key: TKey; icon: typeof Map }
 
 export function Sidebar() {
   const path = usePathname();
-  const { snapshot, error, t } = useNabd();
+  const { snapshot, error, apiOnline, t } = useNabd();
   const crossing = snapshot?.crew.filter((w) => w.eta_hours !== null).length ?? 0;
-  const online = !!snapshot && !error;
+  const online = apiOnline || (!!snapshot && !error);
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-[232px] shrink-0 flex-col border-e border-[var(--line)] bg-[var(--panel)] lg:flex">

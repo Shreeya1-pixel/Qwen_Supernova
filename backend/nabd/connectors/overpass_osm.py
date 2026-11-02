@@ -96,7 +96,7 @@ async def assets(kind: str = "both") -> dict[str, Any]:
         "roads": [],
     }
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(18.0, connect=6.0)) as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(8.0, connect=4.0)) as client:
             if kind in ("both", "buildings"):
                 seen: set[int] = set()
                 for bbox in AOIS.values():

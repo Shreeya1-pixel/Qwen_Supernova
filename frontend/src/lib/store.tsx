@@ -21,6 +21,7 @@ interface NabdState {
   snapshot: Snapshot | null;
   loading: boolean;
   error: string | null;
+  apiOnline: boolean;
   refresh: () => void;
 }
 
@@ -56,6 +57,7 @@ export function NabdProvider({ children }: { children: React.ReactNode }) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [settledKey, setSettledKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [apiOnline, setApiOnline] = useState(false);
   const [tick, setTick] = useState(0);
   const request = useRef(0);
 
@@ -69,13 +71,26 @@ export function NabdProvider({ children }: { children: React.ReactNode }) {
     api.scenarios().then((r) => setScenarios(r.scenarios)).catch(() => {});
   }, [error]);
 
+  // Health ping — sidebar "Engines" should not depend on slow Open-Meteo site fusion.
   useEffect(() => {
-    api.sites(replay).then((r) => setSites(r.sites)).catch(() => {});
-  }, [replay, tick]);
+    let alive = true;
+    const ping = () =>
+      api
+        .health()
+        .then(() => alive && setApiOnline(true))
+        .catch(() => alive && setApiOnline(false));
+    ping();
+    const t = setInterval(ping, 60_000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [tick]);
 
   const requestKey = `${siteId}|${replay}|${ramadan}|${tick}`;
   const loading = settledKey !== requestKey;
 
+  // Site snapshot first (demo path). Defer full /sites list so it doesn't starve Open-Meteo.
   useEffect(() => {
     const id = ++request.current;
     api
@@ -84,10 +99,18 @@ export function NabdProvider({ children }: { children: React.ReactNode }) {
         if (id !== request.current) return;
         setSnapshot(s);
         setError(null);
+        setApiOnline(true);
       })
       .catch((e: Error) => id === request.current && setError(e.message))
       .finally(() => id === request.current && setSettledKey(`${siteId}|${replay}|${ramadan}|${tick}`));
   }, [siteId, replay, ramadan, tick]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      api.sites(replay).then((r) => setSites(r.sites)).catch(() => {});
+    }, 800);
+    return () => clearTimeout(t);
+  }, [replay, tick]);
 
   useEffect(() => {
     if (!error) return;
@@ -117,9 +140,10 @@ export function NabdProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       lang, setLang, t,
-      siteId, setSiteId, replay, setReplay, ramadan, setRamadan, glare, setGlare, sites, scenarios, snapshot, loading, error, refresh,
+      siteId, setSiteId, replay, setReplay, ramadan, setRamadan, glare, setGlare,
+      sites, scenarios, snapshot, loading, error, apiOnline, refresh,
     }),
-    [lang, setLang, t, siteId, replay, setReplay, ramadan, glare, sites, scenarios, snapshot, loading, error, refresh],
+    [lang, setLang, t, siteId, replay, setReplay, ramadan, glare, sites, scenarios, snapshot, loading, error, apiOnline, refresh],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

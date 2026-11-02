@@ -1,6 +1,7 @@
 // Defaults to /api (relative) so it works when frontend + backend share one domain (Docker on Render).
 // For local dev: set NEXT_PUBLIC_NABD_API=http://127.0.0.1:8040/api in frontend/.env.local
-export const API = (process.env.NEXT_PUBLIC_NABD_API ?? "/api").replace(/\/+$/, "");
+// Note: empty string must not win over the default (?? only treats null/undefined).
+export const API = (process.env.NEXT_PUBLIC_NABD_API || "/api").replace(/\/+$/, "");
 
 export type Level = "SAFE" | "WATCH" | "CAUTION" | "RESTRICT" | "STOP_WORK";
 
@@ -352,14 +353,27 @@ export interface OrbitRainfall {
   note: string;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
-    ...init,
-    headers: { "content-type": "application/json", ...(init?.headers ?? {}) },
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
-  return res.json() as Promise<T>;
+async function request<T>(path: string, init?: RequestInit & { timeoutMs?: number }): Promise<T> {
+  const { timeoutMs = 45_000, ...rest } = init ?? {};
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${API}${path}`, {
+      ...rest,
+      signal: rest.signal ?? ctrl.signal,
+      headers: { "content-type": "application/json", ...(rest.headers ?? {}) },
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+    return res.json() as Promise<T>;
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") {
+      throw new Error(`timeout ${path}`);
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 const q = (params: Record<string, string | boolean | null | undefined>) => {
@@ -396,14 +410,16 @@ export const api = {
       `/sites/${id}/sensors/simulate${q({ attack })}`,
       { method: "POST" },
     ),
-  orbit: () => request<OrbitBriefing>("/orbit"),
-  orbitPhase: (id: string) => request<OrbitPhaseDetail>(`/orbit/phases/${encodeURIComponent(id)}`),
+  health: () => request<{ ok: boolean }>("/health", { timeoutMs: 8_000 }),
+  orbit: () => request<OrbitBriefing>("/orbit", { timeoutMs: 25_000 }),
+  orbitPhase: (id: string) => request<OrbitPhaseDetail>(`/orbit/phases/${encodeURIComponent(id)}`, { timeoutMs: 25_000 }),
   orbitRainfall: (lat = 24.8, lon = 56.12) =>
-    request<OrbitRainfall>(`/orbit/rainfall?lat=${lat}&lon=${lon}`),
-  orbitScenes: () => request<OrbitScenes>("/orbit/scenes"),
-  orbitOsm: () => request<OrbitOsm>("/orbit/osm"),
-  orbitNasa: () => request<OrbitNasa>("/orbit/nasa"),
-  orbitFacilities: (phase = "t6") => request<OrbitFacilities>(`/orbit/facilities?phase_id=${encodeURIComponent(phase)}`),
+    request<OrbitRainfall>(`/orbit/rainfall?lat=${lat}&lon=${lon}`, { timeoutMs: 20_000 }),
+  orbitScenes: () => request<OrbitScenes>("/orbit/scenes", { timeoutMs: 30_000 }),
+  orbitOsm: () => request<OrbitOsm>("/orbit/osm", { timeoutMs: 22_000 }),
+  orbitNasa: () => request<OrbitNasa>("/orbit/nasa", { timeoutMs: 15_000 }),
+  orbitFacilities: (phase = "t6") =>
+    request<OrbitFacilities>(`/orbit/facilities?phase_id=${encodeURIComponent(phase)}`, { timeoutMs: 25_000 }),
 };
 
 export interface OrbitNasaTile {

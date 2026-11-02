@@ -32,16 +32,19 @@ export default function OrbitScreen() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([api.orbit(), api.orbitRainfall(), api.orbitScenes(), api.orbitOsm(), api.orbitNasa()])
-      .then(([b, r, s, o, n]) => {
-        if (!alive) return;
-        setBrief(b);
-        setRain(r);
-        setScenes(s);
-        setOsm(o);
-        setNasa(n);
-      })
-      .catch((e: Error) => alive && setErr(e.message));
+    // Load independently — one slow STAC/OSM call must not blank KPIs + NASA wall.
+    const soft = <T,>(p: Promise<T>, set: (v: T) => void, critical = false) =>
+      p.then((v) => {
+        if (alive) set(v);
+      }).catch((e: Error) => {
+        if (alive && critical) setErr((prev) => prev ?? e.message);
+      });
+
+    soft(api.orbit(), setBrief, true);
+    soft(api.orbitNasa(), setNasa, true);
+    soft(api.orbitScenes(), setScenes);
+    soft(api.orbitRainfall(), setRain);
+    soft(api.orbitOsm(), setOsm); // Overpass often slow on free hosts — non-blocking
     return () => {
       alive = false;
     };
@@ -49,13 +52,18 @@ export default function OrbitScreen() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([api.orbitPhase(phaseId), api.orbitFacilities(phaseId)])
-      .then(([d, f]) => {
-        if (!alive) return;
-        setDetail(d);
-        setFacilities(f);
-      })
-      .catch((e: Error) => alive && setErr(e.message));
+    setDetail(null);
+    setFacilities(null);
+    api
+      .orbitPhase(phaseId)
+      .then((d) => alive && setDetail(d))
+      .catch((e: Error) => alive && setErr((prev) => prev ?? e.message));
+    api
+      .orbitFacilities(phaseId)
+      .then((f) => alive && setFacilities(f))
+      .catch(() => {
+        /* facilities optional */
+      });
     return () => {
       alive = false;
     };
