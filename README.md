@@ -18,13 +18,27 @@ Right now, a satellite is crossing the UAE. It sees clouds over the Hajar, ships
 
 ## Deploy on Render
 
-This repository is pre-configured for one-click deployment on **[Render](https://render.com)**:
+**Recommended:** one Docker Web Service (UI + API, one URL). Config: [`render.yaml`](render.yaml) + [`Dockerfile`](Dockerfile).
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
 
-- **One-Click Blueprint (`render.yaml`)**: Deploys both FastAPI backend and Next.js frontend services automatically.
-- **Single-Container Free Tier (`Dockerfile`)**: Deploys both frontend and backend in 1 free-tier Web Service (100% within the 750 free monthly hours).
-- See **[DEPLOY_RENDER.md](DEPLOY_RENDER.md)** for complete deployment options, environment variables, and verification steps.
+Full steps → **[DEPLOY_RENDER.md](DEPLOY_RENDER.md)**. Optional two-service blueprint → [`deploy/render.split.yaml`](deploy/render.split.yaml).
+
+---
+
+## Repo layout
+
+```
+backend/          FastAPI API (nabd/) + tests + scripts/
+frontend/         Next.js UI
+docs/             Architecture, methods, images
+deploy/           Extra Render blueprints (split services)
+scripts/          Map/data prep helpers
+tools/            Internal build helpers (not needed to run the app)
+Dockerfile        Single-service production image
+render.yaml       Default Render blueprint (Docker)
+HACKATHON.md      Theme 04 pitch notes
+```
 
 ---
 
