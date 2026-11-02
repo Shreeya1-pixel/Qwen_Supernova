@@ -1,0 +1,22 @@
+{
+  "source": "Cached OSM-style corridor extract (Hatta + Dubai South)",
+  "note": "Served when live Overpass mirrors are busy. Same AOIs as the live query; replace automatically when Overpass returns.",
+  "buildings": [
+    {"id": "fb-h1", "name": "Hatta Heritage shops", "use": "retail", "lon": 56.11, "lat": 24.80},
+    {"id": "fb-h2", "name": "Hatta school", "use": "school", "lon": 56.13, "lat": 24.82},
+    {"id": "fb-h3", "name": "Wadi residences", "use": "apartments", "lon": 56.09, "lat": 24.81},
+    {"id": "fb-h4", "name": "Clinic annex", "use": "yes", "lon": 56.15, "lat": 24.84},
+    {"id": "fb-h5", "name": "Farm store", "use": "commercial", "lon": 56.17, "lat": 24.80},
+    {"id": "fb-d1", "name": "Logistics warehouse A", "use": "warehouse", "lon": 55.14, "lat": 24.89},
+    {"id": "fb-d2", "name": "Worker accommodation", "use": "residential", "lon": 55.16, "lat": 24.91},
+    {"id": "fb-d3", "name": "Site office", "use": "office", "lon": 55.12, "lat": 24.88},
+    {"id": "fb-d4", "name": "Substation", "use": "industrial", "lon": 55.19, "lat": 24.90},
+    {"id": "fb-d5", "name": "Retail strip", "use": "retail", "lon": 55.21, "lat": 24.93}
+  ],
+  "roads": [
+    {"id": "fr-h1", "name": "E44 Hatta approach", "class": "primary", "coords": [[56.04, 24.80], [56.10, 24.81], [56.16, 24.82]]},
+    {"id": "fr-h2", "name": "Wadi crossing", "class": "residential", "coords": [[56.10, 24.78], [56.12, 24.81], [56.13, 24.85]]},
+    {"id": "fr-d1", "name": "Dubai South link", "class": "secondary", "coords": [[55.08, 24.88], [55.14, 24.89], [55.20, 24.90]]},
+    {"id": "fr-d2", "name": "Al Maktoum service", "class": "tertiary", "coords": [[55.12, 24.86], [55.16, 24.88], [55.18, 24.92]]}
+  ]
+}

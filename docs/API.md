@@ -38,7 +38,7 @@ Backend: FastAPI on `http://127.0.0.1:8040`. Every endpoint is keyless unless no
 | `/scenario` | Scenario mode (flood zone, population, buildings) |
 | `/sensors` | Sensor trust and red team |
 | `/audit` | Audit log |
-| `/story` | Pitch story |
+| `/orbit` | Theme 04 · NASA wall + flood triage |
 | `/relay?slot=0..4` | A single off-grid phone |
 
 ## Layout
@@ -55,11 +55,12 @@ NABD/
 │   └── tests/
 ├── frontend/src/
 │   ├── app/(bulletin)/(app)/   dashboard screens incl. scenario/
-│   ├── app/(bulletin)/story/   pitch story · app/relay/ off-grid phone
+│   ├── app/(bulletin)/(app)/orbit/  Theme 04 NASA wall + flood triage
+│   └── app/relay/              off-grid phone UI
 │   ├── components/dash/        dashboard panels · live-map
 │   ├── components/viz/         maps and charts · scenario-map
 │   ├── components/sections/    story sections · scenario panel, layers, banner
 │   └── lib/                    api · store · i18n (EN/AR) · mesh · alerts · population · scenario
 ├── scripts/prep_population.py  WorldPop GeoTIFF → frontend/public/data/pop_dubai.json
-└── docs/                       METHODS · API · ARCHITECTURE · SPEAKER_NOTES · NABD_pitch.pdf · img · validation.json
+└── docs/                       METHODS · API · ARCHITECTURE · NABD_pitch.pdf · img · validation.json
 ```

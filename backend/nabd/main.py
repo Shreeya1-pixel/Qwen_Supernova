@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 
 from . import service
 from .automation.playbooks import AUDIT_LOG, _audit
-from .connectors import eonet, gemini, geo, jira, markets, news, whatsapp
+from .connectors import eonet, gemini, geo, jira, markets, nasa_gibs, news, overpass_osm, overture_places, stac_eo, whatsapp
 from .connectors.open_meteo import site_frame
 from .engine import backtest, exposure, orbit_response, thresholds
 from .engine.physiology import find_worker
@@ -239,6 +239,48 @@ async def orbit_phase(phase_id: str):
 async def orbit_rainfall(lat: float = Query(24.80, ge=22, le=27), lon: float = Query(56.12, ge=51, le=57)):
     """Event-window precipitation near Hatta (Open-Meteo archive when reachable)."""
     return await orbit_response.rainfall_series(lat, lon)
+
+
+@app.get("/api/orbit/scenes")
+async def orbit_scenes():
+    """Live Sentinel-1 / Sentinel-2 STAC hits over the April 2024 UAE flood AOI."""
+    return await stac_eo.flood_event_scenes()
+
+
+@app.get("/api/orbit/osm")
+async def orbit_osm():
+    """Live OSM buildings & roads in the flood corridor (Overpass)."""
+    return await overpass_osm.assets("both")
+
+
+@app.get("/api/orbit/nasa")
+async def orbit_nasa():
+    """NASA GIBS context layers for 16 April 2024 (true-colour / LST / AOD)."""
+    return nasa_gibs.april_2024_context()
+
+
+@app.get("/api/orbit/facilities")
+async def orbit_facilities(phase_id: str = Query("t6")):
+    """Overture Maps hospitals/schools/clinics triaged against the flood mask."""
+    try:
+        phase = orbit_response.phase_by_id(phase_id)
+    except KeyError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    fac = phase.get("facilities") or {}
+    meta = overture_places.load()
+    return {
+        "phase_id": phase_id,
+        "source": fac.get("source") or meta["source"],
+        "scanned": fac.get("scanned", meta["count"]),
+        "flooded": fac.get("flooded", 0),
+        "hospitals_flooded": fac.get("hospitals_flooded", 0),
+        "schools_flooded": fac.get("schools_flooded", 0),
+        "clinics_flooded": fac.get("clinics_flooded", 0),
+        "critical_flooded": fac.get("critical_flooded", 0),
+        "facilities": fac.get("facilities") or [],
+        "geojson": fac.get("geojson"),
+        "note": fac.get("note") or meta["note"],
+    }
 
 
 @app.get("/api/geo/heat")

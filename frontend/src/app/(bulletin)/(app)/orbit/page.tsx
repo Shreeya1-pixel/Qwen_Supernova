@@ -3,12 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { PageHead } from "@/components/dash/page-head";
 import { Loading, Panel } from "@/components/dash/ui";
+import { NasaWall } from "@/components/viz/nasa-wall";
 import { OrbitMap } from "@/components/viz/orbit-map";
 import {
   api,
   type OrbitBriefing,
+  type OrbitFacilities,
+  type OrbitNasa,
+  type OrbitOsm,
   type OrbitPhaseDetail,
   type OrbitRainfall,
+  type OrbitScenes,
 } from "@/lib/api";
 import { cn } from "@/lib/format";
 import { useNabd } from "@/lib/store";
@@ -19,15 +24,22 @@ export default function OrbitScreen() {
   const [phaseId, setPhaseId] = useState("t6");
   const [detail, setDetail] = useState<OrbitPhaseDetail | null>(null);
   const [rain, setRain] = useState<OrbitRainfall | null>(null);
+  const [scenes, setScenes] = useState<OrbitScenes | null>(null);
+  const [osm, setOsm] = useState<OrbitOsm | null>(null);
+  const [nasa, setNasa] = useState<OrbitNasa | null>(null);
+  const [facilities, setFacilities] = useState<OrbitFacilities | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
-    Promise.all([api.orbit(), api.orbitRainfall()])
-      .then(([b, r]) => {
+    Promise.all([api.orbit(), api.orbitRainfall(), api.orbitScenes(), api.orbitOsm(), api.orbitNasa()])
+      .then(([b, r, s, o, n]) => {
         if (!alive) return;
         setBrief(b);
         setRain(r);
+        setScenes(s);
+        setOsm(o);
+        setNasa(n);
       })
       .catch((e: Error) => alive && setErr(e.message));
     return () => {
@@ -37,9 +49,12 @@ export default function OrbitScreen() {
 
   useEffect(() => {
     let alive = true;
-    api
-      .orbitPhase(phaseId)
-      .then((d) => alive && setDetail(d))
+    Promise.all([api.orbitPhase(phaseId), api.orbitFacilities(phaseId)])
+      .then(([d, f]) => {
+        if (!alive) return;
+        setDetail(d);
+        setFacilities(f);
+      })
       .catch((e: Error) => alive && setErr(e.message));
     return () => {
       alive = false;
@@ -75,10 +90,15 @@ export default function OrbitScreen() {
         <Kpi
           label={t("orbit.kpi.lead")}
           value={brief ? `${brief.advantage_hours} h` : "–"}
-          hint={t("orbit.kpi.leadHint")}
+          hint={t("orbit.latencyNote")}
           accent
         />
       </div>
+      {brief?.latency_note && <p className="mb-3 text-[0.78rem] text-muted">{brief.latency_note}</p>}
+
+      <Panel title={t("orbit.nasa")} className="mb-3" action={<span className="label">GIBS · live WMS</span>}>
+        <NasaWall nasa={nasa} />
+      </Panel>
 
       <Panel title={t("orbit.event")} className="mb-3" action={<span className="label">{brief?.event.peak_local?.replace("T", " ") ?? ""}</span>}>
         {!brief ? (
@@ -211,6 +231,44 @@ export default function OrbitScreen() {
         </div>
       </div>
 
+      <div className="mt-3 grid gap-3 xl:grid-cols-12">
+        <Panel title={t("orbit.eo")} className="xl:col-span-8" action={<span className="label">STAC · live</span>}>
+          <p className="mb-3 text-[0.82rem] text-muted">{scenes?.why ?? t("orbit.eoWhy")}</p>
+          <p className="mb-2 text-[0.75rem] font-bold uppercase tracking-wide text-muted">
+            {(scenes?.theme_data ?? ["Sentinel-1 radar", "Sentinel-2", "Copernicus DEM"]).join(" · ")}
+          </p>
+          <div className="grid gap-3 md:grid-cols-3">
+            <SceneList title={t("orbit.s1")} block={scenes?.sentinel1} empty={t("orbit.scenesEmpty")} />
+            <SceneList title={t("orbit.s2")} block={scenes?.sentinel2} empty={t("orbit.scenesEmpty")} />
+            <SceneList title={t("orbit.dem")} block={scenes?.copernicus_dem} empty={t("orbit.scenesEmpty")} />
+          </div>
+        </Panel>
+        <Panel title={t("orbit.facilities")} className="xl:col-span-4" action={<span className="label">Overture</span>}>
+          {!facilities ? (
+            <Loading />
+          ) : (
+            <div className="space-y-2 text-[0.85rem]">
+              <Stat row="Scanned" val={`${facilities.scanned}`} />
+              <Stat row="Flooded" val={`${facilities.flooded}`} />
+              <Stat row="Hospitals" val={`${facilities.hospitals_flooded}`} />
+              <Stat row="Schools" val={`${facilities.schools_flooded}`} />
+              <Stat row="Clinics" val={`${facilities.clinics_flooded}`} />
+              <p className="text-[0.78rem] text-muted">{facilities.note || t("orbit.facHint")}</p>
+              {nasa && (
+                <p className="text-[0.75rem] text-muted">
+                  <span className="font-bold">{t("orbit.nasa")}:</span> {nasa.date} · {nasa.theme_split.nasa.join(", ")}
+                </p>
+              )}
+              {osm && (
+                <p className="text-[0.72rem] text-muted">
+                  OSM corridor · bld {osm.buildings_count ?? 0} · rd {osm.roads_count ?? 0}
+                </p>
+              )}
+            </div>
+          )}
+        </Panel>
+      </div>
+
       <Panel title={t("orbit.deliver")} className="mt-3">
         <ul className="grid gap-2 text-[0.85rem] md:grid-cols-2">
           {(brief?.deliverables ?? [t("orbit.loading")]).map((d) => (
@@ -222,6 +280,41 @@ export default function OrbitScreen() {
         <p className="label mt-3 normal-case">{t("orbit.honest")}</p>
       </Panel>
     </>
+  );
+}
+
+function SceneList({
+  title,
+  block,
+  empty,
+}: {
+  title: string;
+  block?: { ok: boolean; count: number; scenes: { id?: string; datetime?: string; platform?: string; eo_cloud_cover?: number; sar_instrument_mode?: string }[]; note: string };
+  empty: string;
+}) {
+  return (
+    <div className="rounded-lg border border-[var(--line)] p-2.5">
+      <div className="mb-1 flex items-baseline justify-between gap-2">
+        <span className="font-bold">{title}</span>
+        <span className="num text-[0.75rem] text-muted">{block ? `${block.count} scenes` : "…"}</span>
+      </div>
+      {!block ? (
+        <Loading rows={2} />
+      ) : block.scenes.length === 0 ? (
+        <p className="text-[0.78rem] text-muted">{empty}</p>
+      ) : (
+        <ul className="max-h-36 space-y-1 overflow-y-auto text-[0.75rem]">
+          {block.scenes.slice(0, 5).map((s) => (
+            <li key={s.id ?? s.datetime} className="flex justify-between gap-2 border-b border-[var(--line)] py-1">
+              <span className="truncate">{s.datetime?.replace("T", " ").slice(0, 16) ?? s.id}</span>
+              <span className="shrink-0 text-muted">
+                {s.sar_instrument_mode ?? (s.eo_cloud_cover != null ? `${Math.round(s.eo_cloud_cover)}% cloud` : s.platform ?? "")}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

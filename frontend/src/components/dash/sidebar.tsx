@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, BellRing, BookOpen, FileClock, LayoutDashboard, Map, MessagesSquare, Satellite, ShieldCheck, Users, Waves } from "lucide-react";
+import { Activity, BellRing, FileClock, LayoutDashboard, Map, MessagesSquare, Satellite, ShieldCheck, Users, Waves } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useNabd } from "@/lib/store";
@@ -76,9 +76,6 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="space-y-2 border-t border-[var(--line)] p-3">
-        <Link href="/story" className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[0.85rem] font-bold text-ink/75 hover:bg-sand/70 hover:text-ink">
-          <BookOpen className="size-4" /> {t("side.story")}
-        </Link>
         <div className="flex items-center gap-2 px-2.5 text-[0.75rem] font-semibold text-muted">
           <span className={cn("size-2 rounded-full", online ? "beat bg-gulf" : "bg-oxide")} />
           {t("side.backend")} · {online ? t("side.online") : t("side.offline")}

@@ -258,6 +258,10 @@ export interface OrbitKpis {
   buildings_critical: number;
   roads_km_affected: number;
   zones_active: number;
+  overture_scanned?: number;
+  overture_flooded?: number;
+  hospitals_flooded?: number;
+  schools_flooded?: number;
 }
 
 export interface OrbitBriefing {
@@ -280,9 +284,17 @@ export interface OrbitBriefing {
   };
   advantage_hours: number;
   one_liner: string;
+  latency_note?: string;
   deliverables: string[];
   peak_kpis: OrbitKpis;
   triage_kpis: OrbitKpis;
+  overture?: {
+    scanned: number;
+    source: string;
+    flooded_at_triage: number;
+    hospitals_flooded: number;
+    schools_flooded: number;
+  };
   phases: { id: string; label: string; hours_after_onset: number; kpis: OrbitKpis }[];
 }
 
@@ -385,4 +397,73 @@ export const api = {
   orbitPhase: (id: string) => request<OrbitPhaseDetail>(`/orbit/phases/${encodeURIComponent(id)}`),
   orbitRainfall: (lat = 24.8, lon = 56.12) =>
     request<OrbitRainfall>(`/orbit/rainfall?lat=${lat}&lon=${lon}`),
+  orbitScenes: () => request<OrbitScenes>("/orbit/scenes"),
+  orbitOsm: () => request<OrbitOsm>("/orbit/osm"),
+  orbitNasa: () => request<OrbitNasa>("/orbit/nasa"),
+  orbitFacilities: (phase = "t6") => request<OrbitFacilities>(`/orbit/facilities?phase_id=${encodeURIComponent(phase)}`),
 };
+
+export interface OrbitNasaTile {
+  id: string;
+  title: string;
+  vibe: string;
+  layer: string;
+  date: string;
+  url: string;
+  format?: string;
+}
+
+export interface OrbitNasa {
+  ok: boolean;
+  connected?: boolean;
+  source: string;
+  endpoint?: string;
+  date: string;
+  note: string;
+  theme_split: { nasa: string[]; copernicus_theme04: string[] };
+  gallery?: OrbitNasaTile[];
+  sequence?: OrbitNasaTile[];
+  hero?: OrbitNasaTile;
+  layers: Record<string, OrbitNasaTile | { layer: string; date: string; url: string }>;
+}
+
+export interface OrbitFacilities {
+  phase_id: string;
+  source: string;
+  scanned: number;
+  flooded: number;
+  hospitals_flooded: number;
+  schools_flooded: number;
+  clinics_flooded: number;
+  critical_flooded: number;
+  note: string;
+}
+
+export interface OrbitScene {
+  id?: string;
+  collection?: string;
+  datetime?: string;
+  platform?: string;
+  sar_instrument_mode?: string;
+  eo_cloud_cover?: number;
+  thumbnail?: string;
+}
+
+export interface OrbitScenes {
+  event: string;
+  why: string;
+  theme?: string;
+  theme_data: string[];
+  sentinel1: { ok: boolean; count: number; scenes: OrbitScene[]; source: string; note: string; stale?: boolean };
+  sentinel2: { ok: boolean; count: number; scenes: OrbitScene[]; source: string; note: string; stale?: boolean };
+  copernicus_dem?: { ok: boolean; count: number; scenes: OrbitScene[]; source: string; note: string; stale?: boolean };
+}
+
+export interface OrbitOsm {
+  ok: boolean;
+  source: string;
+  buildings_count?: number;
+  roads_count?: number;
+  note: string;
+  stale?: boolean;
+}

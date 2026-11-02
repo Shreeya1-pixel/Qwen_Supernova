@@ -7,11 +7,13 @@ Spacepoint.
 Honest labels:
   - Flood water masks are *prototype SAR-style extents* calibrated to
     reported April 2024 inundation corridors (Hatta wadi, Dubai South /
-    airport approaches). They are not a live Sentinel-1 GEE pipeline.
-  - Rainfall series prefer Open-Meteo archive when reachable; otherwise a
-    published-event fallback for the same window is used.
-  - Building/road inventories are synthetic asset layers placed on those
-    corridors so responders can rehearse triage — not OSM dump extracts.
+    airport approaches). They are not a live Sentinel-1 change-detection job.
+  - T+4 / T+6 / ~42 h figures are *design targets* for a radar-first pipeline
+    vs typical optical clear — not measured wall-clock of this repo.
+  - Critical facilities for damage triage come from **Overture Maps** (real places).
+  - Demo road polylines remain a compact corridor sample; facilities are the
+    primary real asset layer.
+  - NASA GIBS supplies true-colour / land-heat context for the event window.
 """
 from __future__ import annotations
 
@@ -20,6 +22,8 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import httpx
+
+from ..connectors import overture_places
 
 # ---------------------------------------------------------------------------
 # April 2024 reference event
@@ -38,21 +42,36 @@ EVENT = {
         "first responders still needed a map of *where water was* and "
         "*which roads and buildings were cut* within hours, not days."
     ),
+    "theme_goals": [
+        "Map floods within hours, not days",
+        "Assess damage to roads and buildings",
+        "Learn from the April 2024 UAE floods",
+    ],
+    "theme_data": ["Sentinel-1 radar", "Sentinel-2", "Copernicus DEM"],
     "sources": [
-        "Meteosat / NCM rainfall reports (event totals)",
-        "Open-Meteo archive precipitation (site series)",
-        "NASA GIBS true-colour context",
-        "Prototype Sentinel-1 style water-change extents (calibrated corridors)",
-        "GPM IMERG-class rainfall framing (event totals)",
+        "Sentinel-1 radar — live STAC (Element84 Earth Search)",
+        "Sentinel-2 — live STAC (Element84 Earth Search)",
+        "Copernicus DEM (GLO-30) — live STAC tiles over the AOI",
+        "NASA GIBS — VIIRS/MODIS context for 16 Apr 2024",
+        "Overture Maps places — hospitals, schools, clinics (real POIs)",
+        "Open-Meteo archive precipitation — ERA5-class (supporting)",
+        "NCM / Meteosat event totals for 16 April 2024",
+        "Prototype Sentinel-1-style water extents calibrated to reported corridors",
     ],
 }
 
-# Hours after first heavy rain when each product is ready in this prototype.
+# Design targets for a radar-first responder pipeline (not measured wall-clock here).
 LATENCY = {
     "orbit_flood_mask_h": 4,
     "orbit_damage_triage_h": 6,
     "traditional_optical_h": 48,
     "traditional_field_survey_h": 72,
+    "measured": False,
+    "note": (
+        "T+4 / T+6 / ~42 h are design targets for Sentinel-1-first mapping vs typical "
+        "post-storm optical clear (~48 h). This prototype does not yet run a timed "
+        "SAR processor; live STAC + NASA GIBS + Overture triage are what execute now."
+    ),
 }
 
 # ---------------------------------------------------------------------------
@@ -306,6 +325,20 @@ def _phase_payload(phase: dict[str, Any]) -> dict[str, Any]:
     critical = sum(1 for b in buildings if b["severity"] == "critical")
     impacted = sum(1 for b in buildings if b["flooded"])
 
+    depths = [props.get("depth_class", "moderate") for _, props in phase.get("polygons") or []]
+    facilities = overture_places.triage(rings, depths) if rings else {
+        "scanned": overture_places.load()["count"],
+        "flooded": 0,
+        "hospitals_flooded": 0,
+        "schools_flooded": 0,
+        "clinics_flooded": 0,
+        "critical_flooded": 0,
+        "facilities": [],
+        "geojson": {"type": "FeatureCollection", "features": []},
+        "source": overture_places.load()["source"],
+        "note": overture_places.load()["note"],
+    }
+
     return {
         "id": phase["id"],
         "label": phase["label"],
@@ -319,7 +352,12 @@ def _phase_payload(phase: dict[str, Any]) -> dict[str, Any]:
             "buildings_critical": critical,
             "roads_km_affected": round(road_km_cut, 2),
             "zones_active": len({props["zone"] for _, props in phase.get("polygons") or []}),
+            "overture_scanned": facilities.get("scanned", 0),
+            "overture_flooded": facilities.get("flooded", 0),
+            "hospitals_flooded": facilities.get("hospitals_flooded", 0),
+            "schools_flooded": facilities.get("schools_flooded", 0),
         },
+        "facilities": facilities,
         "flood": {"type": "FeatureCollection", "features": polys},
         "buildings": buildings,
         "roads": roads,
@@ -430,19 +468,29 @@ def briefing() -> dict[str, Any]:
         "latency": LATENCY,
         "advantage_hours": LATENCY["traditional_optical_h"] - LATENCY["orbit_damage_triage_h"],
         "one_liner": (
-            "NABD Orbit maps flood water from space in ~4 h and scores roads "
-            f"and buildings by ~{LATENCY['orbit_damage_triage_h']} h — "
-            f"~{LATENCY['traditional_optical_h'] - LATENCY['orbit_damage_triage_h']} h "
-            "before optical clearing after the April 2024 UAE storms."
+            "NABD Orbit replays the April 2024 UAE floods with Sentinel-1 / Sentinel-2 / "
+            "Copernicus DEM (live STAC), NASA GIBS context, and Overture Maps triage of "
+            f"{overture_places.load()['count']}+ real hospitals, schools and clinics "
+            "against the flood mask."
         ),
+        "latency_note": LATENCY.get("note"),
         "deliverables": [
-            "Flood extent within hours (prototype Sentinel-1 style water mask)",
-            "Rainfall estimate for the event window (archive / GPM-class framing)",
-            "Damage triage: roads impassable / partial / clear; buildings critical / impacted / safe",
             "April 2024 UAE floods as the worked example",
+            "Prototype Sentinel-1-style flood extents (calibrated corridors) — not a full SAR processor yet",
+            "Live STAC: Sentinel-1 radar, Sentinel-2, Copernicus DEM over the AOI",
+            "NASA GIBS true-colour / land-heat context for the event window",
+            f"Overture Maps damage triage: {overture_places.load()['count']} critical places scanned",
+            "Design-target latency story (T+4 / T+6 vs ~T+48 optical) — labelled as targets, not wall-clock",
         ],
         "peak_kpis": peak["kpis"],
         "triage_kpis": triage["kpis"],
+        "overture": {
+            "scanned": overture_places.load()["count"],
+            "source": overture_places.load()["source"],
+            "flooded_at_triage": triage.get("facilities", {}).get("flooded", 0),
+            "hospitals_flooded": triage.get("facilities", {}).get("hospitals_flooded", 0),
+            "schools_flooded": triage.get("facilities", {}).get("schools_flooded", 0),
+        },
         "phases": [{"id": p["id"], "label": p["label"], "hours_after_onset": p["hours_after_onset"], "kpis": p["kpis"]} for p in mapped],
     }
 
