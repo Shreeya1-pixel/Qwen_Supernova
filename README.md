@@ -4,13 +4,13 @@
 
 NABD is the **satellite → multilingual → offline** responder stack — not a flood-map-only demo.  
 April 2024 UAE / Hatta is the **worked example**; the product differentiators are EO + last-mile language + mesh alerts.  
-Honest limits: flood mask is offline-precomputed and **unvalidated**; **T+4 / T+6** are design targets only.
+Honest limits: flood mask is offline-precomputed, **unvalidated**, and km² includes smoothing; **T+4 / T+6** are design targets only; offline relay in the browser is **BroadcastChannel** (stand-in for BLE).
 
 | Differentiator | What judges can open |
 |---|---|
 | **① Satellite** | Live **NASA GIBS** wall · Sentinel-1/2 · Copernicus DEM (STAC) · S1 flood mask · Overture triage → [/orbit](https://qwen-supernova-2.onrender.com/orbit) |
 | **② Multilingual** | **8 languages** · on-device **codeswitch** intake (no LLM) · EN/AR UI + RTL → [/messages](https://qwen-supernova-2.onrender.com/messages) |
-| **③ Offline** | **21-byte** signed BLE-sized frames · phone-to-phone hop · no internet → [/alerts](https://qwen-supernova-2.onrender.com/alerts) |
+| **③ Offline** | **21-byte** signed BLE-sized frame (what handsets would carry) · demo radio = **BroadcastChannel** → [/alerts](https://qwen-supernova-2.onrender.com/alerts) |
 
 **Live demo:** [https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com) · cold-start ~30–60s on free Render.
 
@@ -29,7 +29,7 @@ Honest limits: flood mask is offline-precomputed and **unvalidated**; **T+4 / T+
 
 **Stack:** FastAPI + Next.js · one Docker image on Render · pytest suite on the critical engines.
 
-**Honest limits (judges will ask):** weaknesses are an **unvalidated** flood mask (offline-precomputed from real S1 RTC pairs — not a live timed SAR processor, not field-checked) and **T+4 / T+6** vs ~**T+48** optical figures that are only **design targets**, not wall-clock of this repo.
+**Honest limits (judges will ask):** flood mask is **unvalidated** (offline-precomputed from real S1 RTC pairs — not a live timed SAR job; km² includes morphological smoothing); **T+4 / T+6** vs ~**T+48** optical are **design targets** only; offline demo uses browser **BroadcastChannel** with simulated range — not real Bluetooth LE.
 
 ---
 
@@ -37,7 +37,7 @@ Honest limits: flood mask is offline-precomputed and **unvalidated**; **T+4 / T+
 
 1. **Satellite →** [/orbit](https://qwen-supernova-2.onrender.com/orbit) — NASA wall · S1 phases **T+0 → T+6 → T+12** · Overture triage  
 2. **Multilingual →** [/messages](https://qwen-supernova-2.onrender.com/messages) — type mixed-language symptoms · council reacts  
-3. **Offline →** [/alerts](https://qwen-supernova-2.onrender.com/alerts) — fire a 21-byte frame · phones update without internet  
+3. **Offline →** [/alerts](https://qwen-supernova-2.onrender.com/alerts) — fire a 21-byte frame · tabs update via BroadcastChannel (BLE stand-in)  
 4. Smoke APIs:
 
 ```bash
@@ -58,7 +58,7 @@ Browser (Next.js)
 FastAPI (nabd)
     ├── /api/orbit/*     Theme 04 — GIBS, STAC, S1 mask GeoJSON, Overture triage
     ├── /api/sites/*     Live Open-Meteo fusion → hazards → exposure graph → council
-    ├── intake / alerts  Codeswitch + 21-byte signed BLE-sized frames
+    ├── intake / alerts  Codeswitch + 21-byte signed frames (BroadcastChannel demo / BLE-sized)
     └── audit            Hash-chained decision log
 ```
 
@@ -102,7 +102,7 @@ Peers can also replay Hatta 2024. NABD still ships the **last mile**: workers sp
 | ② Multilingual | ③ Offline last mile |
 |:---:|:---:|
 | <img src="docs/img/messages.jpg" width="420" alt="Messages — multilingual intake + council"> | <img src="docs/img/alerts.jpg" width="420" alt="Alerts — 21-byte frames + phone mesh"> |
-| [/messages](https://qwen-supernova-2.onrender.com/messages) · 8 languages · codeswitch · no LLM | [/alerts](https://qwen-supernova-2.onrender.com/alerts) · 21-byte signed · BLE hop · per-phone language |
+| [/messages](https://qwen-supernova-2.onrender.com/messages) · 8 languages · codeswitch · no LLM | [/alerts](https://qwen-supernova-2.onrender.com/alerts) · 21-byte signed · demo = BroadcastChannel; frame is what handsets would carry |
 
 Also under the hood: deterministic council (land × body × integrity) · exposure graph · audit hash chain · weather cache so free-tier 429s don’t blank Overview.
 
