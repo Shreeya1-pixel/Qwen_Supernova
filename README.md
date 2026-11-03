@@ -6,7 +6,7 @@
 **Demo video:** [Google Drive](https://drive.google.com/drive/folders/10RjlP-vZgU97e-VpDHzhiybuU0HiYyhU?usp=sharing)
 
 **Pitch:** NABD (نبض, *pulse*) turns a satellite overpass into a first-responder flood + damage view, then gets the decision to outdoor workers in their language — even when the site has no internet.  
-**Score Theme 04 on [`/orbit`](https://qwen-supernova-2.onrender.com/orbit) + EO APIs;** the safety stack is the reused last mile ([built vs reused](#built-for-this-hackathon-vs-reused-platform)).
+**Theme 04 path:** [`/orbit`](https://qwen-supernova-2.onrender.com/orbit) + EO APIs — flood mask, NASA wall, damage triage. The rest of NABD (messages, alerts, map, council) is the same product carrying that decision to workers.
 
 **Who:** emergency / site coordinators and the multilingual outdoor workforce they protect.  
 **Problem:** after the **April 2024 UAE floods**, warnings existed, but responders still needed *where the water was* and *which roads and buildings were cut* within hours — not after optical clear (~2 days) — and crews still needed alerts they could read offline.
@@ -21,13 +21,13 @@
 
 ---
 
-## Built for this hackathon vs reused platform
+## What’s in NABD
 
-| Built / extended for Theme 04 (this weekend’s EO path) | Reused from the earlier NABD safety platform |
+| Theme 04 · from orbit | Satellite → worker |
 |---|---|
-| `/orbit` UI + `/api/orbit/*` — NASA GIBS wall, STAC scenes, S1 flood GeoJSON + provenance, Overture triage, rainfall, phase timeline | Live weather fusion `/api/sites/*`, hazard bands, **council**, **exposure graph**, crew strain |
-| S1 RTC precompute script + stored scene-ID tests | Multilingual **codeswitch** intake, EN/AR + RTL UI |
-| Render Docker deploy for the combined app | **21-byte** signed alert frame + mesh demo; Mirage trust / audit hash chain |
+| `/orbit` + `/api/orbit/*` — NASA GIBS wall, STAC scenes, S1 flood GeoJSON + provenance, Overture triage, rainfall, phase timeline | Live weather `/api/sites/*` · hazard bands · **council** · **exposure graph** · crew strain |
+| S1 RTC precompute + stored scene-ID tests | **8-language codeswitch** intake · EN/AR + RTL |
+| Docker deploy on Render | **21-byte** signed alert frame (BroadcastChannel demo) · Mirage trust · audit hash chain |
 
 ---
 
@@ -86,9 +86,9 @@ Flood maps alone don’t reach a worker who doesn’t speak English and whose si
 
 ---
 
-## Reused platform (last mile around the orbit decision)
+## Live map + scenario
 
-Same product, beyond the orbit page: live hazards → who is exposed → site action.
+Beyond `/orbit`: live hazards → who is exposed → site action.
 
 | Live heat map · STOP WORK | Scenario · flood exercise (simulated) |
 |:---:|:---:|
