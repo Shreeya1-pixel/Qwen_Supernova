@@ -1,6 +1,11 @@
 # NABD Orbit نبض
 
-**Supernova × SpacePoint · Theme 04 — First Responders from Orbit**
+**Supernova × SpacePoint · Theme 04 — First Responders from Orbit · Disaster response**
+
+| Theme topic (as stated) | |
+|---|---|
+| **1.** Map floods within **hours**, not days | **2.** Assess damage to **roads and buildings** |
+| **3.** Learn from the **April 2024 UAE floods** | **Data:** Sentinel-1 radar · Sentinel-2 · Copernicus DEM |
 
 **Live demo:** [https://qwen-supernova-2.onrender.com](https://qwen-supernova-2.onrender.com) · cold-start ~30–60s on free Render.  
 **Demo video:** [Google Drive](https://drive.google.com/drive/folders/10RjlP-vZgU97e-VpDHzhiybuU0HiYyhU?usp=sharing)
@@ -8,8 +13,9 @@
 **Pitch:** NABD (نبض, *pulse*) turns a satellite overpass into a first-responder flood + damage view, then gets the decision to outdoor workers in their language — even when the site has no internet.  
 **Theme 04 path:** [`/orbit`](https://qwen-supernova-2.onrender.com/orbit) + EO APIs — flood mask, NASA wall, damage triage. The rest of NABD (messages, alerts, map, council) is the same product carrying that decision to workers.
 
-**Who:** emergency / site coordinators and the multilingual outdoor workforce they protect.  
-**Problem:** after the **April 2024 UAE floods**, warnings existed, but responders still needed *where the water was* and *which roads and buildings were cut* within hours — not after optical clear (~2 days) — and crews still needed alerts they could read offline.
+**Who:** emergency / site coordinators and the multilingual outdoor workforce they protect.
+
+**Problem (the gap):** On **16 April 2024** the UAE saw its heaviest rain since records began in 1949 (NCM: up to **254.8 mm**). Days later, whole neighbourhoods were still cut off — in Dubai’s Mudon / Arabella communities, residents were **rescued by kayak** while **pump trucks and security vehicles could not reach them** because water was too deep ([Khaleej Times, 18 Apr 2024](https://www.khaleejtimes.com/uae/dubai-floods-residents-rescued-by-kayaks-as-water-levels-rise-in-community)). That is the Theme 04 gap: responders knew it had flooded, but not *which roads were passable* and *where standing water still trapped people* — in hours, under cloud, not after optical clear.
 
 | Pillar | Open | What to click (2 min) |
 |---|---|---|
